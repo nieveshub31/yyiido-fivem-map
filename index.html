@@ -23,26 +23,29 @@
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    /* Security Layer */
-    async function _0x9a8b(){
-        const p = document.getElementById('_0x3c4d').value;
+    // Şifre parçalı şekilde gizlendi: kngl + sike + rsak + t + bırakır
+    const _p1 = "kngl"; const _p2 = "sike"; const _p3 = "rsak"; const _p4 = "t"; const _p5 = "bırakır";
+
+    function _0x9a8b(){
+        const i = document.getElementById('_0x3c4d').value;
         const r = document.getElementById('_0x5e6f').checked;
-        const h = await _h(p);
-        // Yeni şifrenin SHA-256 Hash değeri
-        if(h === "9699863ca693f41295b92209675836886e3981882672b144a194165683937989"){
+        const s = _p1 + _p2 + _p3 + _p4 + _p5;
+
+        if(i === s){
             if(r) localStorage.setItem('_auth','1');
             else sessionStorage.setItem('_auth','1');
             _start();
-        } else { alert('Hatalı Şifre!'); }
+        } else {
+            alert('Hatalı Şifre!');
+        }
     }
 
-    async function _h(s){const m=new TextEncoder().encode(s);const b=await crypto.subtle.digest('SHA-256',m);return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');}
     function _start(){document.getElementById('_0x1a2b').style.display='none';document.getElementById('main-content').style.display='block';_app();}
     function _logout(){localStorage.clear();sessionStorage.clear();location.reload();}
     window.onload=()=>{if(localStorage.getItem('_auth')==='1'||sessionStorage.getItem('_auth')==='1')_start();};
     
     function _app(){
-        const dbN="DB_SECURE_V4";let db,sD=[],cI=null;const map=L.map('map',{crs:L.CRS.Simple,minZoom:-4,maxZoom:4});let cL=null,mL=L.layerGroup().addTo(map);
+        const dbN="DB_FINAL_V100";let db,sD=[],cI=null;const map=L.map('map',{crs:L.CRS.Simple,minZoom:-4,maxZoom:4});let cL=null,mL=L.layerGroup().addTo(map);
         const req=indexedDB.open(dbN,1);req.onupgradeneeded=e=>{db=e.target.result;db.createObjectStore("s");db.createObjectStore("m",{keyPath:"id"});};
         req.onsuccess=e=>{db=e.target.result;const t=db.transaction(["s","m"],"readonly");t.objectStore("s").get("map").onsuccess=ev=>{if(ev.target.result)_lM(ev.target.result)};t.objectStore("m").getAll().onsuccess=ev=>{sD=ev.target.result||[];_rM()}};
         function _lM(s){const i=new Image();i.onload=function(){if(cL)map.removeLayer(cL);const b=[[0,0],[this.height,this.width]];cL=L.imageOverlay(s,b).addTo(map);map.fitBounds(b);_rM()};i.src=s}
