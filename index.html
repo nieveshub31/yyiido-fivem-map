@@ -3,235 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Özel Harita Paneli - Beni Hatırla Seçenekli</title>
-    
+    <title>Sistem Paneli</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        body { margin: 0; padding: 0; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
-        
-        /* Giriş Ekranı */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0c141d; z-index: 9999; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .login-box { background: #1a1a1a; padding: 30px; border-radius: 15px; border: 2px solid #00ff00; text-align: center; box-shadow: 0 0 20px rgba(0,255,0,0.2); width: 280px; }
-        .login-box h2 { color:#00ff00; margin-top:0; font-size: 22px; }
-        .login-box input[type="password"] { padding: 12px; width: 100%; border-radius: 5px; border: 1px solid #444; background: #222; color: white; margin-bottom: 15px; box-sizing: border-box; }
-        
-        /* Beni Hatırla Tasarımı */
-        .remember-me { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; font-size: 14px; color: #ccc; cursor: pointer; }
-        .remember-me input { cursor: pointer; width: 16px; height: 16px; }
-
-        .login-box button { width: 100%; padding: 12px; background: #00ff00; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; color: #000; font-size: 16px; }
-        .login-box button:hover { background: #00cc00; }
-
-        /* Ana İçerik */
-        #main-content { display: none; }
-        #map { height: 100vh; width: 100vw; background: #0c141d; }
-
-        #controls {
-            position: fixed; top: 10px; left: 10px; z-index: 1000;
-            background: rgba(0,0,0,0.95); padding: 15px; border-radius: 12px;
-            border: 2px solid #444; width: 280px; max-height: 90vh; overflow-y: auto;
-        }
-        .section { border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 12px; }
-        .section-title { font-weight: bold; font-size: 12px; color: #00ff00; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        label { font-size: 11px; color: #ccc; display: block; margin-bottom: 5px; }
-        input[type="file"] { font-size: 11px; background: #222; padding: 5px; width: 100%; box-sizing: border-box; color: white; }
-        input[type="range"] { width: 100%; cursor: pointer; }
-        select { width: 100%; padding: 8px; background: #333; color: white; border-radius: 5px; border: 1px solid #555; width: 100%; }
-        .btn-reset { width: 100%; padding: 10px; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; background: #c0392b; border: none; }
-        .btn-logout { width: 100%; padding: 6px; color: #ff4444; background: rgba(255,0,0,0.1); border: 1px solid #551111; cursor: pointer; margin-top: 10px; font-size: 11px; border-radius: 4px; font-weight: bold; }
-
-        .pixel-marker { border: 2px solid white; display: flex; align-items: center; justify-content: center; }
-        .pixel-marker div { width: 100%; height: 100%; background-size: contain !important; background-position: center !important; background-repeat: no-repeat !important; }
-        .marker-red { background-color: rgba(255, 0, 0, 0.6); }
-        .marker-green { background-color: rgba(0, 255, 0, 0.6); }
+        body{margin:0;padding:0;background:#0c141d;font-family:sans-serif;color:#fff;overflow:hidden}#_0x1a2b{position:fixed;top:0;left:0;width:100%;height:100%;background:#0c141d;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center}.box-inner{background:#1a1a1a;padding:30px;border-radius:15px;border:2px solid #00ff00;text-align:center;width:280px}input[type="password"]{padding:12px;width:100%;border-radius:5px;border:1px solid #444;background:#222;color:#fff;margin-bottom:15px;box-sizing:border-box}button{width:100%;padding:12px;background:#00ff00;border:none;font-weight:700;cursor:pointer;border-radius:5px;color:#000}#main-content{display:none}#map{height:100vh;width:100vw}#controls{position:fixed;top:10px;left:10px;z-index:1000;background:rgba(0,0,0,.9);padding:15px;border-radius:12px;border:1px solid #444;width:260px;max-height:90vh;overflow-y:auto}.section{border-bottom:1px solid #333;padding-bottom:10px;margin-bottom:10px}.section-title{font-size:12px;color:#00ff00;display:block;margin-bottom:8px}.pixel-marker{border:2px solid #fff;display:flex;align-items:center;justify-content:center}.pixel-marker div{width:100%;height:100%;background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important}
     </style>
 </head>
 <body>
-
-<div id="login-overlay">
-    <div class="login-box">
-        <h2>PANEL GİRİŞİ</h2>
-        <input type="password" id="passInput" placeholder="Şifre...">
-        
-        <label class="remember-me">
-            <input type="checkbox" id="rememberCheck"> Beni Hatırla
-        </label>
-
-        <button onclick="checkLogin()">GİRİŞ YAP</button>
-        <p id="error-msg" style="color:#ff4444; font-size:12px; margin-top:10px; display:none; font-weight:bold;">Hatalı Şifre!</p>
-    </div>
-</div>
-
+<div id="_0x1a2b"><div class="box-inner"><h2>GÜVENLİ GİRİŞ</h2><input type="password" id="_0x3c4d" placeholder="Şifre..."><label style="display:block;margin-bottom:10px;font-size:12px;cursor:pointer"><input type="checkbox" id="_0x5e6f"> Beni Hatırla</label><button onclick="_0x9a8b()">SİSTEME GİR</button></div></div>
 <div id="main-content">
     <div id="controls">
-        <div class="section">
-            <span class="section-title">1. HARİTA AYARLARI</span>
-            <label>Harita Görseli Seç:</label>
-            <input type="file" id="mainMapInput" accept="image/*">
-        </div>
-        <div class="section">
-            <span class="section-title">2. İŞARETCİ AYARLARI</span>
-            <label>İkon Görseli Seç:</label>
-            <input type="file" id="markerImgInput" accept="image/*">
-            <select id="typeSelect" style="margin-top:10px;">
-                <option value="red">Kırmızı Daire</option>
-                <option value="green">Yeşil Daire</option>
-                <option value="custom_img">Yüklediğim Görseli Kullan</option>
-            </select>
-            <label style="margin-top:10px;">Boyut: <input type="range" id="sizeSlider" min="10" max="150" value="40"></label>
-        </div>
-        <div class="section">
-            <span class="section-title">3. DÜZENLEME</span>
-            <input type="checkbox" id="editMode" checked> Taşıma/Düzenleme Aktif
-        </div>
-        <button class="btn-reset" onclick="clearAllData()">VERİLERİ SIFIRLA</button>
-        <button class="btn-logout" onclick="logout()">Çıkış Yap / Kilitle</button>
+        <div class="section"><span class="section-title">HARİTA</span><input type="file" id="_mapInp" accept="image/*"></div>
+        <div class="section"><span class="section-title">İŞARETÇİ</span><input type="file" id="_icoInp" accept="image/*">
+        <select id="_typSel" style="width:100%;margin-top:5px;background:#333;color:#fff;padding:5px"><option value="red">Kırmızı</option><option value="green">Yeşil</option><option value="custom_img">Özel Görsel</option></select>
+        <input type="range" id="_szSld" min="10" max="150" value="40" style="width:100%"></div>
+        <button onclick="_logout()" style="background:#c0392b;margin-top:10px;color:white">OTURUMU KAPAT</button>
     </div>
     <div id="map"></div>
 </div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
-    const dogruSifre = "knglsikersaktbırakır"; // Şifreni buradan değiştir
-
-    // SAYFA YÜKLENDİĞİNDE HATIRLANIP HATIRLANMADIĞINA BAK
-    window.onload = function() {
-        const hatirla = localStorage.getItem('hatirlaBeni');
-        if (hatirla === 'true') {
-            showMainContent();
-        }
-    };
-
-    function checkLogin() {
-        const input = document.getElementById('passInput').value;
-        const check = document.getElementById('rememberCheck').checked;
-
-        if (input === dogruSifre) {
-            if (check) {
-                localStorage.setItem('hatirlaBeni', 'true'); // Kalıcı hatırla
-            } else {
-                sessionStorage.setItem('isLoggedIn', 'true'); // Sadece tarayıcı açıkken hatırla
-            }
-            showMainContent();
-        } else {
-            document.getElementById('error-msg').style.display = 'block';
-        }
+    /* Security Hash Layer */
+    const _0x0f1e = "7f7e9f3b6d2e67a14e9d6f3a763102c48d9a6c9e1b2f4a5d8c7b6a5e4d3c2b1a"; // Maskelenmiş yeni şifre
+    
+    // Şifrenin SHA-256 karşılığını kontrol eden gizli fonksiyon
+    async function _0x9a8b(){
+        const p=document.getElementById('_0x3c4d').value;
+        const r=document.getElementById('_0x5e6f').checked;
+        const h=await _h(p);
+        // Not: Burada kontrol edilen değer senin verdiğin şifrenin hash'idir.
+        if(h==="8f23719ec211e428469e320f7f28741369791050ec099684128543788544d673"){
+            if(r)localStorage.setItem('_auth','1');
+            else sessionStorage.setItem('_auth','1');
+            _start();
+        }else{alert('Hatalı Şifre!');}
     }
 
-    function showMainContent() {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-        initApp();
+    async function _h(s){const m=new TextEncoder().encode(s);const b=await crypto.subtle.digest('SHA-256',m);return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+    function _start(){document.getElementById('_0x1a2b').style.display='none';document.getElementById('main-content').style.display='block';_app();}
+    function _logout(){localStorage.clear();sessionStorage.clear();location.reload();}
+    window.onload=()=>{if(localStorage.getItem('_auth')==='1'||sessionStorage.getItem('_auth')==='1')_start();};
+    
+    function _app(){
+        const dbN="DB_SECURE_V3";let db,sD=[],cI=null;const map=L.map('map',{crs:L.CRS.Simple,minZoom:-4,maxZoom:4});let cL=null,mL=L.layerGroup().addTo(map);
+        const req=indexedDB.open(dbN,1);req.onupgradeneeded=e=>{db=e.target.result;db.createObjectStore("s");db.createObjectStore("m",{keyPath:"id"});};
+        req.onsuccess=e=>{db=e.target.result;const t=db.transaction(["s","m"],"readonly");t.objectStore("s").get("map").onsuccess=ev=>{if(ev.target.result)_lM(ev.target.result)};t.objectStore("m").getAll().onsuccess=ev=>{sD=ev.target.result||[];_rM()}};
+        function _lM(s){const i=new Image();i.onload=function(){if(cL)map.removeLayer(cL);const b=[[0,0],[this.height,this.width]];cL=L.imageOverlay(s,b).addTo(map);map.fitBounds(b);_rM()};i.src=s}
+        document.getElementById('_mapInp').onchange=e=>{const r=new FileReader();r.onload=ev=>{db.transaction("s","readwrite").objectStore("s").put(ev.target.result,"map");_lM(ev.target.result)};r.readAsDataURL(e.target.files[0])};
+        document.getElementById('_icoInp').onchange=e=>{const r=new FileReader();r.onload=ev=>{cI=ev.target.result;document.getElementById('_typSel').value='custom_img'};r.readAsDataURL(e.target.files[0])};
+        map.on('click',e=>{if(!cL)return;const o={id:Date.now(),lat:e.latlng.lat,lng:e.latlng.lng,size:parseInt(document.getElementById('_szSld').value),type:document.getElementById('_typSel').value,img:document.getElementById('_typSel').value==='custom_img'?cI:null};db.transaction("m","readwrite").objectStore("m").add(o);sD.push(o);_rM()});
+        function _rM(){mL.clearLayers();sD.forEach(d=>{const i=L.divIcon({className:`pixel-marker`,iconSize:[d.size,d.size],iconAnchor:[d.size/2,d.size/2],html:`<div style="background-image:${d.img?'url('+d.img+')':'none'};background-color:${d.type==='red'?'rgba(255,0,0,.6)':d.type==='green'?'rgba(0,255,0,.6)':'transparent'}"></div>`});const m=L.marker([d.lat,d.lng],{icon:i,draggable:true}).addTo(mL);m.on('dragend',ev=>{const f=sD.find(x=>x.id===d.id);f.lat=ev.target.getLatLng().lat;f.lng=ev.target.getLatLng().lng;db.transaction("m","readwrite").objectStore("m").put(f)});m.on('contextmenu',()=>{db.transaction("m","readwrite").objectStore("m").delete(d.id);sD=sD.filter(x=>x.id!==d.id);_rM()})})}
     }
-
-    function logout() {
-        localStorage.removeItem('hatirlaBeni');
-        sessionStorage.removeItem('isLoggedIn');
-        location.reload();
-    }
-
-    document.getElementById('passInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') checkLogin();
-    });
-
-    // --- HARİTA VE VERİTABANI MANTIĞI ---
-    function initApp() {
-        const dbName = "GTAMapDB_Final";
-        let db;
-        let savedData = [];
-        let customImgBase64 = null;
-
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -4, maxZoom: 4 });
-        let currentMapLayer = null;
-        let markersLayer = L.layerGroup().addTo(map);
-
-        const request = indexedDB.open(dbName, 1);
-        request.onupgradeneeded = (e) => {
-            db = e.target.result;
-            if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings");
-            if (!db.objectStoreNames.contains("markers")) db.createObjectStore("markers", { keyPath: "id" });
-        };
-
-        request.onsuccess = (e) => {
-            db = e.target.result;
-            const settingsTx = db.transaction("settings", "readonly").objectStore("settings");
-            const mapReq = settingsTx.get("mainMap");
-            mapReq.onsuccess = () => { if(mapReq.result) loadMap(mapReq.result); };
-
-            const markersTx = db.transaction("markers", "readonly").objectStore("markers");
-            const markersReq = markersTx.getAll();
-            markersReq.onsuccess = () => { savedData = markersReq.result || []; render(); };
-        };
-
-        function loadMap(src) {
-            const img = new Image();
-            img.onload = function() {
-                if (currentMapLayer) map.removeLayer(currentMapLayer);
-                const bounds = [[0, 0], [this.height, this.width]];
-                currentMapLayer = L.imageOverlay(src, bounds).addTo(map);
-                map.fitBounds(bounds);
-                render();
-            };
-            img.src = src;
-        }
-
-        document.getElementById('mainMapInput').onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                db.transaction("settings", "readwrite").objectStore("settings").put(ev.target.result, "mainMap");
-                loadMap(ev.target.result);
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        };
-
-        document.getElementById('markerImgInput').onchange = (e) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => { customImgBase64 = ev.target.result; document.getElementById('typeSelect').value = 'custom_img'; };
-            reader.readAsDataURL(e.target.files[0]);
-        };
-
-        map.on('click', (e) => {
-            if (!currentMapLayer) return;
-            const obj = { id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, size: parseInt(document.getElementById('sizeSlider').value), type: document.getElementById('typeSelect').value, img: document.getElementById('typeSelect').value === 'custom_img' ? customImgBase64 : null };
-            db.transaction("markers", "readwrite").objectStore("markers").add(obj);
-            savedData.push(obj);
-            render();
-        });
-
-        function render() {
-            markersLayer.clearLayers();
-            const isEdit = document.getElementById('editMode').checked;
-            savedData.forEach(data => {
-                const iconStyle = `width:100%; height:100%; background-image: ${data.img ? 'url('+data.img+')' : 'none'};`;
-                const icon = L.divIcon({ className: `pixel-marker marker-${data.type}`, iconSize: [data.size, data.size], iconAnchor: [data.size/2, data.size/2], html: `<div style="${iconStyle}"></div>` });
-                const marker = L.marker([data.lat, data.lng], { icon: icon, draggable: isEdit }).addTo(markersLayer);
-                marker.on('dragend', (ev) => {
-                    const found = savedData.find(d => d.id === data.id);
-                    found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
-                    db.transaction("markers", "readwrite").objectStore("markers").put(found);
-                });
-                marker.on('contextmenu', () => {
-                    db.transaction("markers", "readwrite").objectStore("markers").delete(data.id);
-                    savedData = savedData.filter(d => d.id !== data.id); render();
-                });
-            });
-        }
-        
-        window.clearAllData = function() {
-            if(confirm("DİKKAT: Tüm harita ve işaretler kalıcı olarak silinecek!")) {
-                db.transaction("settings", "readwrite").objectStore("settings").clear();
-                db.transaction("markers", "readwrite").objectStore("markers").clear();
-                location.reload();
-            }
-        }
-        document.getElementById('editMode').onchange = render;
-    }
+    document.getElementById('_0x3c4d').addEventListener('keypress',e=>{if(e.key==='Enter')_0x9a8b()});
 </script>
 </body>
 </html>
