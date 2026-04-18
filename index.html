@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA 5 Harita Planlayıcı</title>
+    <title>GTA 5 Harita Planlayıcı - Limitsiz</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -11,18 +11,18 @@
         body { margin: 0; padding: 0; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; }
         #map { height: 100vh; width: 100vw; background: #0c141d; }
 
-        /* Kontrol Paneli */
         #controls {
             position: fixed; top: 10px; left: 10px; z-index: 1000;
             background: rgba(0,0,0,0.95); padding: 15px; border-radius: 12px;
             border: 2px solid #444; width: 280px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-height: 90vh; overflow-y: auto;
         }
 
         .section { border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 12px; }
         .section-title { font-weight: bold; font-size: 12px; color: #00ff00; text-transform: uppercase; margin-bottom: 8px; display: block; }
         
         label { font-size: 11px; color: #ccc; display: block; margin-bottom: 5px; }
-        input[type="file"] { font-size: 11px; background: #222; padding: 5px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        input[type="file"] { font-size: 11px; background: #222; padding: 5px; border-radius: 4px; width: 100%; box-sizing: border-box; color: white; }
         
         input[type="range"] { width: 100%; margin-top: 5px; cursor: pointer; }
         .val-label { float: right; color: #ffcc00; }
@@ -37,7 +37,6 @@
             background: linear-gradient(to bottom, #e74c3c, #c0392b);
         }
 
-        /* İşaretçi Stilleri */
         .pixel-marker { border: 2px solid white; display: flex; align-items: center; justify-content: center; }
         .pixel-marker div { 
             width: 100%; height: 100%; 
@@ -61,7 +60,7 @@
 
     <div class="section">
         <span class="section-title">2. İŞARETCİ AYARLARI</span>
-        <label>Özel İkon/Görsel Seç (Opsiyonel):</label>
+        <label>İkon Görseli Seç (Opsiyonel):</label>
         <input type="file" id="markerImgInput" accept="image/*">
         
         <div style="margin-top:10px;">
@@ -87,7 +86,7 @@
         </div>
     </div>
 
-    <button class="btn-reset" onclick="clearAll()">TÜM VERİLERİ SIFIRLA</button>
+    <button class="btn-reset" onclick="clearAllData()">HER ŞEYİ SIFIRLA</button>
 </div>
 
 <div id="map"></div>
@@ -95,24 +94,49 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    let savedData = JSON.parse(localStorage.getItem('gta_v3_data')) || [];
-    let savedMap = localStorage.getItem('gta_v3_map');
+    // --- INDEXEDDB VERİTABANI YÖNETİMİ ---
+    const dbName = "GTAMapDB";
+    let db;
+    let savedData = [];
     let customImgBase64 = null;
 
     const map = L.map('map', { crs: L.CRS.Simple, minZoom: -4, maxZoom: 4 });
     let currentMapLayer = null;
     let markersLayer = L.layerGroup().addTo(map);
 
+    const request = indexedDB.open(dbName, 1);
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings");
+        if (!db.objectStoreNames.contains("markers")) db.createObjectStore("markers", { keyPath: "id" });
+    };
+
+    request.onsuccess = (e) => {
+        db = e.target.result;
+        loadFromDB();
+    };
+
+    async function loadFromDB() {
+        const settingsTx = db.transaction("settings", "readonly").objectStore("settings");
+        const mapReq = settingsTx.get("mainMap");
+        mapReq.onsuccess = () => { if(mapReq.result) initMap(mapReq.result); };
+
+        const markersTx = db.transaction("markers", "readonly").objectStore("markers");
+        const markersReq = markersTx.getAll();
+        markersReq.onsuccess = () => {
+            savedData = markersReq.result || [];
+            renderMarkers();
+        };
+    }
+
     // Harita Yükleme
     document.getElementById('mainMapInput').onchange = function(e) {
         const reader = new FileReader();
-        reader.onload = (ev) => { 
-            try {
-                localStorage.setItem('gta_v3_map', ev.target.result); 
-                initMap(ev.target.result); 
-            } catch(e) {
-                alert("Harita dosyası çok büyük! Lütfen daha küçük boyutlu bir resim seç.");
-            }
+        reader.onload = (ev) => {
+            const data = ev.target.result;
+            const tx = db.transaction("settings", "readwrite").objectStore("settings");
+            tx.put(data, "mainMap");
+            initMap(data);
         };
         reader.readAsDataURL(e.target.files[0]);
     };
@@ -152,15 +176,17 @@
             type: type,
             img: type === 'custom_img' ? customImgBase64 : null
         };
+        
+        const tx = db.transaction("markers", "readwrite").objectStore("markers");
+        tx.add(obj);
         savedData.push(obj);
-        saveAndRender();
+        renderMarkers();
     });
 
     function renderMarkers() {
         markersLayer.clearLayers();
         const isEditable = document.getElementById('editMode').checked;
-        if(isEditable) document.body.classList.add('edit-mode-active');
-        else document.body.classList.remove('edit-mode-active');
+        document.body.classList.toggle('edit-mode-active', isEditable);
 
         savedData.forEach(data => {
             let divStyle = `width:100%; height:100%;`;
@@ -174,14 +200,23 @@
             });
 
             const marker = L.marker([data.lat, data.lng], { icon: icon, draggable: isEditable }).addTo(markersLayer);
+            
             marker.on('dragend', function(ev) {
                 const newPos = ev.target.getLatLng();
                 const found = savedData.find(d => d.id === data.id);
-                if (found) { found.lat = newPos.lat; found.lng = newPos.lng; saveToStorage(); }
+                if (found) {
+                    found.lat = newPos.lat;
+                    found.lng = newPos.lng;
+                    const tx = db.transaction("markers", "readwrite").objectStore("markers");
+                    tx.put(found);
+                }
             });
+
             marker.on('contextmenu', () => {
+                const tx = db.transaction("markers", "readwrite").objectStore("markers");
+                tx.delete(data.id);
                 savedData = savedData.filter(d => d.id !== data.id);
-                saveAndRender();
+                renderMarkers();
             });
         });
     }
@@ -189,12 +224,17 @@
     const slider = document.getElementById('sizeSlider');
     slider.oninput = () => document.getElementById('sizeVal').innerText = slider.value + "px";
 
-    function saveAndRender() { saveToStorage(); renderMarkers(); }
-    function saveToStorage() { localStorage.setItem('gta_v3_data', JSON.stringify(savedData)); }
-    function clearAll() { if(confirm("Tüm veriler temizlenecek!")) { localStorage.clear(); location.reload(); } }
+    function clearAllData() {
+        if(confirm("Tüm harita ve işaretler silinecek! Emin misin?")) {
+            const txSettings = db.transaction("settings", "readwrite").objectStore("settings");
+            txSettings.clear();
+            const txMarkers = db.transaction("markers", "readwrite").objectStore("markers");
+            txMarkers.clear();
+            location.reload();
+        }
+    }
 
     document.getElementById('editMode').onchange = renderMarkers;
-    if (savedMap) initMap(savedMap);
     document.getElementById('map').oncontextmenu = () => false;
 </script>
 
