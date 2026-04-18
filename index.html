@@ -1,3 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Özel Harita Paneli - Beni Hatırla Seçenekli</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+        
+        /* Giriş Ekranı */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0c141d; z-index: 9999; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .login-box { background: #1a1a1a; padding: 30px; border-radius: 15px; border: 2px solid #00ff00; text-align: center; box-shadow: 0 0 20px rgba(0,255,0,0.2); width: 280px; }
+        .login-box h2 { color:#00ff00; margin-top:0; font-size: 22px; }
+        .login-box input[type="password"] { padding: 12px; width: 100%; border-radius: 5px; border: 1px solid #444; background: #222; color: white; margin-bottom: 15px; box-sizing: border-box; }
+        
+        /* Beni Hatırla Tasarımı */
+        .remember-me { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px; font-size: 14px; color: #ccc; cursor: pointer; }
+        .remember-me input { cursor: pointer; width: 16px; height: 16px; }
+
+        .login-box button { width: 100%; padding: 12px; background: #00ff00; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; color: #000; font-size: 16px; }
+        .login-box button:hover { background: #00cc00; }
+
+        /* Ana İçerik */
+        #main-content { display: none; }
+        #map { height: 100vh; width: 100vw; background: #0c141d; }
+
+        #controls {
+            position: fixed; top: 10px; left: 10px; z-index: 1000;
+            background: rgba(0,0,0,0.95); padding: 15px; border-radius: 12px;
+            border: 2px solid #444; width: 280px; max-height: 90vh; overflow-y: auto;
+        }
+        .section { border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 12px; }
+        .section-title { font-weight: bold; font-size: 12px; color: #00ff00; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        label { font-size: 11px; color: #ccc; display: block; margin-bottom: 5px; }
+        input[type="file"] { font-size: 11px; background: #222; padding: 5px; width: 100%; box-sizing: border-box; color: white; }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        select { width: 100%; padding: 8px; background: #333; color: white; border-radius: 5px; border: 1px solid #555; width: 100%; }
+        .btn-reset { width: 100%; padding: 10px; color: white; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; background: #c0392b; border: none; }
+        .btn-logout { width: 100%; padding: 6px; color: #ff4444; background: rgba(255,0,0,0.1); border: 1px solid #551111; cursor: pointer; margin-top: 10px; font-size: 11px; border-radius: 4px; font-weight: bold; }
+
+        .pixel-marker { border: 2px solid white; display: flex; align-items: center; justify-content: center; }
+        .pixel-marker div { width: 100%; height: 100%; background-size: contain !important; background-position: center !important; background-repeat: no-repeat !important; }
+        .marker-red { background-color: rgba(255, 0, 0, 0.6); }
+        .marker-green { background-color: rgba(0, 255, 0, 0.6); }
+    </style>
+</head>
+<body>
+
+<div id="login-overlay">
+    <div class="login-box">
+        <h2>PANEL GİRİŞİ</h2>
+        <input type="password" id="passInput" placeholder="Şifre...">
+        
+        <label class="remember-me">
+            <input type="checkbox" id="rememberCheck"> Beni Hatırla
+        </label>
+
+        <button onclick="checkLogin()">GİRİŞ YAP</button>
+        <p id="error-msg" style="color:#ff4444; font-size:12px; margin-top:10px; display:none; font-weight:bold;">Hatalı Şifre!</p>
+    </div>
+</div>
+
+<div id="main-content">
+    <div id="controls">
+        <div class="section">
+            <span class="section-title">1. HARİTA AYARLARI</span>
+            <label>Harita Görseli Seç:</label>
+            <input type="file" id="mainMapInput" accept="image/*">
+        </div>
+        <div class="section">
+            <span class="section-title">2. İŞARETCİ AYARLARI</span>
+            <label>İkon Görseli Seç:</label>
+            <input type="file" id="markerImgInput" accept="image/*">
+            <select id="typeSelect" style="margin-top:10px;">
+                <option value="red">Kırmızı Daire</option>
+                <option value="green">Yeşil Daire</option>
+                <option value="custom_img">Yüklediğim Görseli Kullan</option>
+            </select>
+            <label style="margin-top:10px;">Boyut: <input type="range" id="sizeSlider" min="10" max="150" value="40"></label>
+        </div>
+        <div class="section">
+            <span class="section-title">3. DÜZENLEME</span>
+            <input type="checkbox" id="editMode" checked> Taşıma/Düzenleme Aktif
+        </div>
+        <button class="btn-reset" onclick="clearAllData()">VERİLERİ SIFIRLA</button>
+        <button class="btn-logout" onclick="logout()">Çıkış Yap / Kilitle</button>
+    </div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
     // Şifreyi parçalara bölerek ve anlamsız değişken isimleriyle gizliyoruz
     const _0x4a1 = "kngl"; 
@@ -55,3 +154,103 @@
         // ... (Geri kalan kodlar burada devam ediyor)
     }
 </script>
+
+    document.getElementById('passInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') checkLogin();
+    });
+
+    // --- HARİTA VE VERİTABANI MANTIĞI ---
+    function initApp() {
+        const dbName = "GTAMapDB_Final";
+        let db;
+        let savedData = [];
+        let customImgBase64 = null;
+
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -4, maxZoom: 4 });
+        let currentMapLayer = null;
+        let markersLayer = L.layerGroup().addTo(map);
+
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("settings")) db.createObjectStore("settings");
+            if (!db.objectStoreNames.contains("markers")) db.createObjectStore("markers", { keyPath: "id" });
+        };
+
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            const settingsTx = db.transaction("settings", "readonly").objectStore("settings");
+            const mapReq = settingsTx.get("mainMap");
+            mapReq.onsuccess = () => { if(mapReq.result) loadMap(mapReq.result); };
+
+            const markersTx = db.transaction("markers", "readonly").objectStore("markers");
+            const markersReq = markersTx.getAll();
+            markersReq.onsuccess = () => { savedData = markersReq.result || []; render(); };
+        };
+
+        function loadMap(src) {
+            const img = new Image();
+            img.onload = function() {
+                if (currentMapLayer) map.removeLayer(currentMapLayer);
+                const bounds = [[0, 0], [this.height, this.width]];
+                currentMapLayer = L.imageOverlay(src, bounds).addTo(map);
+                map.fitBounds(bounds);
+                render();
+            };
+            img.src = src;
+        }
+
+        document.getElementById('mainMapInput').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                db.transaction("settings", "readwrite").objectStore("settings").put(ev.target.result, "mainMap");
+                loadMap(ev.target.result);
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        document.getElementById('markerImgInput').onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => { customImgBase64 = ev.target.result; document.getElementById('typeSelect').value = 'custom_img'; };
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        map.on('click', (e) => {
+            if (!currentMapLayer) return;
+            const obj = { id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, size: parseInt(document.getElementById('sizeSlider').value), type: document.getElementById('typeSelect').value, img: document.getElementById('typeSelect').value === 'custom_img' ? customImgBase64 : null };
+            db.transaction("markers", "readwrite").objectStore("markers").add(obj);
+            savedData.push(obj);
+            render();
+        });
+
+        function render() {
+            markersLayer.clearLayers();
+            const isEdit = document.getElementById('editMode').checked;
+            savedData.forEach(data => {
+                const iconStyle = `width:100%; height:100%; background-image: ${data.img ? 'url('+data.img+')' : 'none'};`;
+                const icon = L.divIcon({ className: `pixel-marker marker-${data.type}`, iconSize: [data.size, data.size], iconAnchor: [data.size/2, data.size/2], html: `<div style="${iconStyle}"></div>` });
+                const marker = L.marker([data.lat, data.lng], { icon: icon, draggable: isEdit }).addTo(markersLayer);
+                marker.on('dragend', (ev) => {
+                    const found = savedData.find(d => d.id === data.id);
+                    found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
+                    db.transaction("markers", "readwrite").objectStore("markers").put(found);
+                });
+                marker.on('contextmenu', () => {
+                    db.transaction("markers", "readwrite").objectStore("markers").delete(data.id);
+                    savedData = savedData.filter(d => d.id !== data.id); render();
+                });
+            });
+        }
+        
+        window.clearAllData = function() {
+            if(confirm("DİKKAT: Tüm harita ve işaretler kalıcı olarak silinecek!")) {
+                db.transaction("settings", "readwrite").objectStore("settings").clear();
+                db.transaction("markers", "readwrite").objectStore("markers").clear();
+                location.reload();
+            }
+        }
+        document.getElementById('editMode').onchange = render;
+    }
+</script>
+</body>
+</html>
