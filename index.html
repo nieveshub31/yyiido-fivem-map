@@ -11,9 +11,10 @@
             --bg-dark: #0c141d;
             --panel-bg: rgba(20, 26, 34, 0.95);
             --border-color: #333;
+            --accent-red: #ff4444;
         }
         
-        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         
         /* Giriş Ekranı */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -33,22 +34,30 @@
             background: var(--panel-bg); padding: 20px; border-radius: 16px;
             border: 1px solid var(--border-color); width: 260px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            max-height: 90vh; overflow-y: auto;
         }
         
-        .panel-header { font-size: 18px; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .panel-header { font-size: 18px; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
         .section { margin-bottom: 20px; }
         .section-title { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
         
-        /* Özel Input Tasarımları */
         .input-group { background: #1a222c; border-radius: 8px; padding: 10px; border: 1px solid #2a3441; margin-bottom: 8px; }
-        input[type="file"] { font-size: 12px; color: #ccc; cursor: pointer; }
+        input[type="file"] { font-size: 12px; color: #ccc; cursor: pointer; width: 100%; }
         select { background: #2a3441; color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; cursor: pointer; outline: none; margin-top: 5px; }
         
+        /* Düzenleme Modu Switch Tasarımı */
+        .switch-group { display: flex; align-items: center; justify-content: space-between; background: #1a222c; padding: 12px; border-radius: 8px; border: 1px solid #2a3441; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         .slider-wrap { margin-top: 10px; }
         input[type="range"] { width: 100%; accent-color: var(--primary-color); cursor: pointer; }
 
-        /* Butonlar */
         .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-logout { background: #3d1414; color: #ff5555; border: 1px solid #551a1a; }
         .btn-logout:hover { background: #5a1a1a; color: white; }
@@ -67,7 +76,7 @@
             <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color)"> Beni Hatırla
         </label>
         <button onclick="checkLogin()">KİLİDİ AÇ</button>
-        <p id="error-msg" style="color:#ff4444; font-size:12px; margin-top:15px; display:none;">Hatalı şifre denemesi!</p>
+        <p id="error-msg" style="color:#ff4444; font-size:12px; margin-top:15px; display:none;">Hatalı şifre!</p>
     </div>
 </div>
 
@@ -99,6 +108,18 @@
             </div>
         </div>
 
+        <div class="section">
+            <span class="section-title">MOD</span>
+            <div class="switch-group">
+                <span style="font-size:13px; color:#ccc">Düzenleme Modu</span>
+                <label class="switch">
+                    <input type="checkbox" id="editMode" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <p style="font-size:10px; color:#666; margin-top:5px;">*Kapatırsanız işaretçiler sabitlenir.</p>
+        </div>
+
         <button class="btn-action btn-logout" onclick="logout()">
             OTURUMU KAPAT
         </button>
@@ -108,7 +129,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // ŞİFRE AYNI KALDI
     const _s1="kngl", _s2="sike", _s3="rsak", _s4="atbı", _s5="rakır";
     
     function checkLogin() {
@@ -138,7 +158,7 @@
     }
 
     function initApp() {
-        const dbName = "MapStore_v5"; // Veritabanı versiyonunu güncelledik
+        const dbName = "MapStore_v6";
         let db, savedMarkers = [], customIcon = null;
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3 });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
@@ -184,28 +204,38 @@
         };
 
         map.on('click', e => {
-            if (!mapLayer) return;
+            if (!mapLayer || !document.getElementById('editMode').checked) return;
             const markerData = { id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, size: parseInt(document.getElementById('sizeSlider').value), type: document.getElementById('typeSelect').value, img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null };
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
             savedMarkers.push(markerData);
             render();
         });
 
+        // MOD DEĞİŞTİĞİNDE YENİDEN ÇİZ (Taşınabilirliği güncellemek için)
+        document.getElementById('editMode').onchange = render;
+
         function render() {
             markerLayer.clearLayers();
+            const isEditable = document.getElementById('editMode').checked;
+            
             savedMarkers.forEach(d => {
                 const style = `background-image:${d.img?'url('+d.img+')':'none'}; background-color:${d.type==='red'?'rgba(255,0,0,0.6)':d.type==='green'?'rgba(0,255,0,0.6)':'transparent'}`;
                 const icon = L.divIcon({ className: 'pixel-marker', iconSize: [d.size, d.size], iconAnchor: [d.size/2, d.size/2], html: `<div style="${style}"></div>` });
-                const m = L.marker([d.lat, d.lng], { icon: icon, draggable: true }).addTo(markerLayer);
-                m.on('dragend', ev => {
-                    const found = savedMarkers.find(x => x.id === d.id);
-                    found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
-                    db.transaction("markers", "readwrite").objectStore("markers").put(found);
-                });
-                m.on('contextmenu', () => {
-                    db.transaction("markers", "readwrite").objectStore("markers").delete(d.id);
-                    savedMarkers = savedMarkers.filter(x => x.id !== d.id); render();
-                });
+                
+                // Draggable durumunu Düzenleme Modu'na bağladık
+                const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
+                
+                if(isEditable) {
+                    m.on('dragend', ev => {
+                        const found = savedMarkers.find(x => x.id === d.id);
+                        found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
+                        db.transaction("markers", "readwrite").objectStore("markers").put(found);
+                    });
+                    m.on('contextmenu', () => {
+                        db.transaction("markers", "readwrite").objectStore("markers").delete(d.id);
+                        savedMarkers = savedMarkers.filter(x => x.id !== d.id); render();
+                    });
+                }
             });
         }
     }
