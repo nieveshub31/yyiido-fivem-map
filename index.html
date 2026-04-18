@@ -1,1 +1,194 @@
 
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA 5 Harita - Sabit Boyutlu İşaretçiler</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; background: #1a1a1a; font-family: 'Segoe UI', sans-serif; color: white; }
+        #map { height: 100vh; width: 100vw; background: #0c141d; }
+
+        #controls {
+            position: fixed; top: 10px; left: 10px; z-index: 1000;
+            background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px;
+            border: 1px solid #444; width: 260px;
+        }
+
+        .section { border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px; }
+        .section-title { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        
+        input[type="file"], input[type="range"] { width: 100%; cursor: pointer; margin-top: 5px; }
+        .val-label { font-size: 12px; color: #00ff00; }
+
+        select { width: 100%; padding: 8px; background: #333; color: white; border: 1px solid #555; border-radius: 4px; }
+        
+        button {
+            width: 100%; padding: 10px; border: none;
+            color: white; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 5px; background: #c0392b;
+        }
+
+        /* Sabit Boyutlu Marker Stilleri */
+        .pixel-marker { 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            box-sizing: border-box;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .marker-red { background-color: rgba(255, 0, 0, 0.7); box-shadow: 0 0 5px red; }
+        .marker-green { background-color: rgba(0, 255, 0, 0.7); box-shadow: 0 0 5px #00ff00; }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <div class="section">
+        <span class="section-title">1. Ana Harita</span>
+        <input type="file" id="mainMapInput" accept="image/*">
+    </div>
+
+    <div class="section">
+        <span class="section-title">2. İkon Yükle (İsteğe Bağlı)</span>
+        <input type="file" id="markerImgInput" accept="image/*">
+    </div>
+
+    <div class="section">
+        <span class="section-title">3. Sabit Boyut: <span id="sizeVal" class="val-label">40px</span></span>
+        <input type="range" id="sizeSlider" min="10" max="150" value="40">
+    </div>
+
+    <div class="section">
+        <span class="section-title">4. İşaretçi Tipi</span>
+        <select id="typeSelect">
+            <option value="red">Kırmızı Daire</option>
+            <option value="green">Yeşil Daire</option>
+            <option value="custom_img">Yüklediğim Görsel</option>
+        </select>
+    </div>
+
+    <button onclick="clearAll()">Hafızayı Temizle</button>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    let savedData = JSON.parse(localStorage.getItem('gta_pixel_markers')) || [];
+    let savedMap = localStorage.getItem('gta_pixel_map');
+    let customImgBase64 = null;
+
+    const map = L.map('map', { 
+        crs: L.CRS.Simple, 
+        minZoom: -4, 
+        maxZoom: 4 
+    });
+
+    let currentMapLayer = null;
+    let markersLayer = L.layerGroup().addTo(map);
+
+    // Ana Harita Yükleme
+    document.getElementById('mainMapInput').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => { 
+            localStorage.setItem('gta_pixel_map', ev.target.result); 
+            initMap(ev.target.result); 
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    });
+
+    // İkon Yükleme
+    document.getElementById('markerImgInput').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => { 
+            customImgBase64 = ev.target.result; 
+            document.getElementById('typeSelect').value = 'custom_img';
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    });
+
+    function initMap(src) {
+        const img = new Image();
+        img.onload = function() {
+            if (currentMapLayer) map.removeLayer(currentMapLayer);
+            const bounds = [[0, 0], [this.height, this.width]];
+            currentMapLayer = L.imageOverlay(src, bounds).addTo(map);
+            map.fitBounds(bounds);
+            renderMarkers();
+        };
+        img.src = src;
+    }
+
+    const slider = document.getElementById('sizeSlider');
+    slider.oninput = () => document.getElementById('sizeVal').innerText = slider.value + "px";
+
+    // Ekrana Tıklandığında Ekle
+    map.on('click', function(e) {
+        if (!currentMapLayer) return;
+
+        const type = document.getElementById('typeSelect').value;
+        const size = parseInt(slider.value);
+        
+        const obj = {
+            id: Date.now(),
+            lat: e.latlng.lat,
+            lng: e.latlng.lng,
+            size: size,
+            type: type,
+            img: type === 'custom_img' ? customImgBase64 : null
+        };
+
+        savedData.push(obj);
+        saveAndRender();
+    });
+
+    function renderMarkers() {
+        markersLayer.clearLayers();
+
+        savedData.forEach(data => {
+            // CSS ile sabit boyutlu icon oluşturma
+            let style = `width:${data.size}px; height:${data.size}px;`;
+            if(data.type === 'custom_img' && data.img) {
+                style += `background-image: url(${data.img}); border:none;`;
+            }
+
+            const icon = L.divIcon({
+                className: `pixel-marker marker-${data.type}`,
+                iconSize: [data.size, data.size],
+                iconAnchor: [data.size/2, data.size/2], // Tam merkeze oturtur
+                html: `<div style="${style}"></div>`
+            });
+
+            const marker = L.marker([data.lat, data.lng], { icon: icon }).addTo(markersLayer);
+
+            // Sağ tık silme
+            marker.on('contextmenu', (ev) => {
+                savedData = savedData.filter(d => d.id !== data.id);
+                saveAndRender();
+            });
+        });
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('gta_pixel_markers', JSON.stringify(savedData));
+        renderMarkers();
+    }
+
+    function clearAll() {
+        if(confirm("Tüm veriler silinecek!")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    if (savedMap) initMap(savedMap);
+    document.getElementById('map').oncontextmenu = () => false;
+</script>
+
+</body>
+</html>
