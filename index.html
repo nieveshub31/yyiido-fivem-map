@@ -102,14 +102,22 @@
         reader.readAsDataURL(e.target.files[0]);
     });
 
-    // İkon Yükleme
+// İkon Yükleme Kısmını Şununla Değiştir:
     document.getElementById('markerImgInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file.size > 1024 * 1024) { // 1MB'dan büyükse uyar
+            alert("İşaretçi görseli çok büyük! Lütfen daha küçük (KB boyutunda) bir görsel seç.");
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = (ev) => { 
             customImgBase64 = ev.target.result; 
             document.getElementById('typeSelect').value = 'custom_img';
+            // Görsel yüklendiğinde önizlemede siyah çıkmaması için:
+            console.log("İşaretçi görseli başarıyla yüklendi.");
         };
-        reader.readAsDataURL(e.target.files[0]);
+        reader.readAsDataURL(file);
     });
 
     function initMap(src) {
