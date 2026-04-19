@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves</title>
+    <title>yyiido nieves - Map System</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -46,7 +46,6 @@
         input[type="file"] { font-size: 12px; color: #ccc; cursor: pointer; width: 100%; }
         select { background: #2a3441; color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; cursor: pointer; outline: none; margin-top: 5px; }
         
-        /* Düzenleme Modu Switch Tasarımı */
         .switch-group { display: flex; align-items: center; justify-content: space-between; background: #1a222c; padding: 12px; border-radius: 8px; border: 1px solid #2a3441; }
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -97,8 +96,8 @@
                 <label style="font-size:11px; color:#666">Özel İkon:</label>
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:10px">
                 <select id="typeSelect">
-                    <option value="red">🔴 Kırmızı Nokta</option>
-                    <option value="green">🟢 Yeşil Nokta</option>
+                    <option value="red">🔴 Kırmızı Kare</option>
+                    <option value="green">🟢 Yeşil Kare</option>
                     <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
                 <div class="slider-wrap">
@@ -129,16 +128,23 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const _s1="kngl", _s2="sike", _s3="rsak", _s4="atbı", _s5="rakır";
-    
+    // Şifre maskelenmiş veri (Base64)
+    const _authKey = "a25nbHNpa2Vyc2FrYXRiaXJha8Sxcg==";
+
     function checkLogin() {
         const p = document.getElementById('passInput').value;
         const r = document.getElementById('rememberCheck').checked;
-        if (p === (_s1+_s2+_s3+_s4+_s5)) {
+        
+        // Şifreyi UTF-8 destekli Base64'e çevirip karşılaştırır
+        const encoded = btoa(unescape(encodeURIComponent(p)));
+        
+        if (encoded === _authKey) {
             if (r) localStorage.setItem('map_session', 'active');
             else sessionStorage.setItem('map_session', 'active');
             showMainContent();
-        } else { document.getElementById('error-msg').style.display = 'block'; }
+        } else { 
+            document.getElementById('error-msg').style.display = 'block'; 
+        }
     }
 
     function showMainContent() {
@@ -211,7 +217,6 @@
             render();
         });
 
-        // MOD DEĞİŞTİĞİNDE YENİDEN ÇİZ (Taşınabilirliği güncellemek için)
         document.getElementById('editMode').onchange = render;
 
         function render() {
@@ -222,7 +227,6 @@
                 const style = `background-image:${d.img?'url('+d.img+')':'none'}; background-color:${d.type==='red'?'rgba(255,0,0,0.6)':d.type==='green'?'rgba(0,255,0,0.6)':'transparent'}`;
                 const icon = L.divIcon({ className: 'pixel-marker', iconSize: [d.size, d.size], iconAnchor: [d.size/2, d.size/2], html: `<div style="${style}"></div>` });
                 
-                // Draggable durumunu Düzenleme Modu'na bağladık
                 const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
                 
                 if(isEditable) {
