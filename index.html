@@ -9,63 +9,93 @@
         :root {
             --primary-color: #00ff00;
             --bg-dark: #0c141d;
-            --panel-bg: rgba(20, 26, 34, 0.95);
+            --panel-bg: rgba(20, 26, 34, 0.98);
             --border-color: #333;
             --accent-red: #ff4444;
+            --input-bg: #1a222c;
         }
         
-        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
+        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; overflow: hidden; }
         
         /* Giriş Ekranı */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-box { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid var(--primary-color); text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .login-box h2 { color: var(--primary-color); letter-spacing: 2px; margin-bottom: 25px; }
-        .login-box input[type="password"] { padding: 15px; width: 100%; border-radius: 8px; border: 1px solid #444; background: #222; color: white; margin-bottom: 20px; box-sizing: border-box; outline: none; }
-        .login-box button { width: 100%; padding: 15px; background: var(--primary-color); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; color: #000; transition: 0.3s; }
+        .login-box h2 { color: var(--primary-color); letter-spacing: 2px; margin-bottom: 25px; font-size: 22px; }
+        .login-box input[type="password"] { padding: 15px; width: 100%; border-radius: 8px; border: 1px solid #444; background: #222; color: white; margin-bottom: 20px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .login-box input[type="password"]:focus { border-color: var(--primary-color); }
+        .login-box button { width: 100%; padding: 15px; background: var(--primary-color); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; color: #000; transition: 0.3s; text-transform: uppercase; }
         .login-box button:hover { background: #00cc00; transform: translateY(-2px); }
 
         /* Ana Arayüz */
         #main-content { display: none; }
-        #map { height: 100vh; width: 100vw; background: var(--bg-dark); }
+        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
         /* Sol Kontrol Paneli */
         #controls {
             position: fixed; top: 20px; left: 20px; z-index: 1000;
-            background: var(--panel-bg); padding: 20px; border-radius: 16px;
-            border: 1px solid var(--border-color); width: 260px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            background: var(--panel-bg); padding: 25px; border-radius: 16px;
+            border: 1px solid var(--border-color); width: 280px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
             max-height: 90vh; overflow-y: auto;
-            transition: transform 0.4s ease, left 0.4s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #controls.collapsed { transform: translateX(-300px); left: 0; }
         
-        /* Panel Toggle Butonu */
-        #toggle-panel {
-            position: absolute; right: -40px; top: 20px; width: 35px; height: 35px;
-            background: var(--panel-bg); border: 1px solid var(--border-color);
-            color: var(--primary-color); display: flex; align-items: center;
-            justify-content: center; border-radius: 0 8px 8px 0; cursor: pointer;
-            font-weight: bold; box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+        /* Panel Kapalı Durumu */
+        #controls.collapsed {
+            transform: translateX(-320px);
         }
 
-        .panel-header { font-size: 18px; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .section { margin-bottom: 20px; }
-        .section-title { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
-        .input-group { background: #1a222c; border-radius: 8px; padding: 10px; border: 1px solid #2a3441; margin-bottom: 8px; }
-        input[type="file"], select, input[type="range"] { width: 100%; cursor: pointer; }
+        /* Yeni Açma/Kapama Butonu (Handle) */
+        #toggle-handle {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            z-index: 1001;
+            width: 40px;
+            height: 40px;
+            background: var(--panel-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            transition: 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
         
-        .switch-group { display: flex; align-items: center; justify-content: space-between; background: #1a222c; padding: 12px; border-radius: 8px; border: 1px solid #2a3441; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        /* Panel açıkken butonu panelin içine/üstüne taşıyoruz */
+        #controls:not(.collapsed) ~ #toggle-handle {
+            left: 275px; /* Panelin genişliğiyle uyumlu */
+            border-radius: 0 8px 8px 0;
+            border-left: none;
+        }
+
+        .panel-header { font-size: 16px; font-weight: 800; color: var(--primary-color); margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; letter-spacing: 1px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 10px; font-weight: 900; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+        
+        .input-group { background: var(--input-bg); border-radius: 10px; padding: 12px; border: 1px solid #2a3441; margin-bottom: 10px; }
+        input[type="file"] { font-size: 12px; color: #888; cursor: pointer; }
+        select { background: #2a3441; color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; margin-top: 8px; cursor: pointer; outline: none; }
+        
+        .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 15px; border-radius: 10px; border: 1px solid #2a3441; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-logout { background: #3d1414; color: #ff5555; border: 1px solid #551a1a; }
+        input[type="range"] { width: 100%; accent-color: var(--primary-color); margin-top: 10px; cursor: pointer; }
 
-        .pixel-marker { border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; font-size: 12px; letter-spacing: 1px; }
+        .btn-logout { background: #2a1212; color: #ff5555; border: 1px solid #441a1a; }
+        .btn-logout:hover { background: #441a1a; color: white; }
+
+        .pixel-marker { border: 2px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.5); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .pixel-marker div { width: 100%; height: 100%; background-size: contain !important; background-position: center !important; background-repeat: no-repeat !important; }
     </style>
 </head>
@@ -76,7 +106,7 @@
         <h2>SİSTEME GİRİŞ</h2>
         <input type="password" id="passInput" placeholder="Erişim Şifresi">
         <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer; font-size:14px; color:#888;">
-            <input type="checkbox" id="rememberCheck"> Beni Hatırla
+            <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color)"> Beni Hatırla
         </label>
         <button onclick="checkLogin()">KİLİDİ AÇ</button>
         <p id="error-msg" style="color:#ff4444; font-size:12px; margin-top:15px; display:none;">Hatalı şifre!</p>
@@ -84,52 +114,62 @@
 </div>
 
 <div id="main-content">
-    <div id="controls">
-        <div id="toggle-panel" onclick="togglePanel()">◀</div>
+    <div id="controls" class="">
         <div class="panel-header">KONTROL PANELİ</div>
+        
         <div class="section">
             <span class="section-title">HARİTA KATMANI</span>
-            <div class="input-group"><input type="file" id="mainMapInput" accept="image/*"></div>
+            <div class="input-group">
+                <input type="file" id="mainMapInput" accept="image/*">
+            </div>
         </div>
+
         <div class="section">
             <span class="section-title">İŞARETÇİ AYARLARI</span>
             <div class="input-group">
-                <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:10px">
+                <label style="font-size:11px; color:#555">Özel İkon Yükle:</label>
+                <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
                     <option value="red">🔴 Kırmızı Nokta</option>
                     <option value="green">🟢 Yeşil Nokta</option>
                     <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
-                <div style="margin-top:10px">
-                    <label style="font-size:11px; color:#666">Boyut:</label>
+                <div style="margin-top:15px">
+                    <label style="font-size:11px; color:#555">Boyut Ayarı:</label>
                     <input type="range" id="sizeSlider" min="10" max="150" value="40">
                 </div>
             </div>
         </div>
+
         <div class="section">
-            <span class="section-title">MOD</span>
+            <span class="section-title">SİSTEM MODU</span>
             <div class="switch-group">
                 <span style="font-size:13px; color:#ccc">Düzenleme Modu</span>
-                <label class="switch"><input type="checkbox" id="editMode" checked><span class="slider"></span></label>
+                <label class="switch">
+                    <input type="checkbox" id="editMode" checked>
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
+
         <button class="btn-action btn-logout" onclick="logout()">OTURUMU KAPAT</button>
     </div>
+
+    <div id="toggle-handle" onclick="togglePanel()">◀</div>
+
     <div id="map"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Şifre: hayatçokzorya (Dizi olarak saklanarak karakter hatası engellendi)
-    const _keyParts = ['h','a','y','a','t','ç','o','k','z','o','r','y','a'];
+    // sssss
+    const _pArr = ['h','a','y','a','t','ç','o','k','z','o','r','y','a'];
 
     function checkLogin() {
-        const input = document.getElementById('passInput').value;
-        const remember = document.getElementById('rememberCheck').checked;
-        const target = _keyParts.join('');
-        
-        if (input === target) {
-            if (remember) localStorage.setItem('map_session', 'active');
+        const p = document.getElementById('passInput').value;
+        const r = document.getElementById('rememberCheck').checked;
+        if (p === _pArr.join('')) {
+            if (r) localStorage.setItem('map_session', 'active');
             else sessionStorage.setItem('map_session', 'active');
             showMainContent();
         } else { 
@@ -139,9 +179,9 @@
 
     function togglePanel() {
         const panel = document.getElementById('controls');
-        const btn = document.getElementById('toggle-panel');
+        const handle = document.getElementById('toggle-handle');
         panel.classList.toggle('collapsed');
-        btn.innerText = panel.classList.contains('collapsed') ? '▶' : '◀';
+        handle.innerText = panel.classList.contains('collapsed') ? '▶' : '◀';
     }
 
     function showMainContent() {
