@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System v1.0</title>
+    <title>yyiido nieves - Map System v8.6</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -23,13 +23,55 @@
         body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); overflow: hidden; }
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
 
-        /* Giriş Ekranı */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-box { background: #161b22; padding: 40px; border-radius: 16px; border: 1px solid #30363d; text-align: center; width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-        .login-box h2 { color: var(--primary-color); letter-spacing: 2px; margin-bottom: 25px; font-size: 18px; font-weight: 800; }
-        .login-box input[type="password"] { padding: 15px; width: 100%; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 20px; outline: none; cursor: text !important; }
-        .login-box button { width: 100%; padding: 15px; background: var(--primary-color); border: none; font-weight: bold; border-radius: 8px; color: #000; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .login-box button:hover { background: #00cc00; transform: translateY(-1px); }
+        /* Modern Giriş Ekranı */
+        #login-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, #111b27 0%, #080c10 100%); 
+            z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .login-box { 
+            background: rgba(22, 27, 34, 0.8); 
+            padding: 50px 40px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(48, 54, 61, 0.5); 
+            text-align: center; width: 380px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+            backdrop-filter: blur(20px);
+        }
+        .login-box h2 { 
+            color: #fff; letter-spacing: 4px; margin-bottom: 30px; 
+            font-size: 22px; font-weight: 900; text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .login-box input[type="password"] { 
+            padding: 18px; width: 100%; border-radius: 12px; 
+            border: 1px solid #30363d; background: #0d1117; 
+            color: white; margin-bottom: 15px; outline: none; 
+            transition: 0.3s; cursor: text !important;
+            text-align: center; letter-spacing: 2px;
+        }
+        .login-box input[type="password"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+        }
+        
+        .remember-me {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; margin-bottom: 25px; color: var(--text-muted);
+            font-size: 13px; cursor: pointer !important;
+        }
+        .remember-me input { accent-color: var(--primary-color); cursor: pointer !important; }
+
+        .login-box button { 
+            width: 100%; padding: 18px; background: var(--primary-color); 
+            border: none; font-weight: 900; border-radius: 12px; 
+            color: #000; transition: 0.3s; text-transform: uppercase; 
+            letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+        }
+        .login-box button:hover { 
+            background: #00ff00; transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+        }
 
         /* Ana İçerik */
         #main-content { display: none; }
@@ -45,7 +87,7 @@
         }
         #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); box-shadow: 0 0 10px rgba(0,255,0,0.5); }
 
-        /* Düzenlenmiş Sol Panel */
+        /* Sol Panel */
         #controls {
             position: fixed; top: 70px; left: 15px; z-index: 1000;
             background: var(--panel-bg); padding: 20px; border-radius: 12px;
@@ -90,10 +132,13 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>yyiido nieves - Map System</h2>
-        <input type="password" id="passInput" placeholder="Erişim Şifresi">
+        <h2>Sisteme Giriş</h2>
+        <input type="password" id="passInput" placeholder="••••••••••••••">
+        <label class="remember-me">
+            <input type="checkbox" id="rememberCheck"> Beni Hatırla
+        </label>
         <button onclick="checkLogin()">KİLİDİ AÇ</button>
-        <p id="error-msg" style="color:var(--danger-color); font-size:11px; margin-top:15px; display:none; font-weight:bold;">Hatalı şifre!</p>
+        <p id="error-msg" style="color:var(--danger-color); font-size:11px; margin-top:15px; display:none; font-weight:bold; letter-spacing: 1px;">Erişim Reddedildi!</p>
     </div>
 </div>
 
@@ -139,6 +184,7 @@
 
         <div class="section">
             <button class="btn-action btn-clear" onclick="confirmClear()">TÜMÜNÜ SİL</button>
+            <button class="btn-action" style="background:#21262d; color:#8b949e; border:1px solid #30363d; margin-top:10px;" onclick="logout()">OTURUMU KAPAT</button>
         </div>
     </div>
     
@@ -147,15 +193,33 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Yeni Şifre: knglrpsikersakatbırakır
+    // Şifre: knglrpsikersakatbırakır
     const _p = "knglrpsikersakatbırakır";
 
     function checkLogin() {
         if (document.getElementById('passInput').value === _p) {
-            sessionStorage.setItem('map_v85_auth', 'active');
+            if (document.getElementById('rememberCheck').checked) {
+                localStorage.setItem('map_auth_persistent', 'true');
+            }
+            sessionStorage.setItem('map_auth', 'true');
             showMainContent();
-        } else { document.getElementById('error-msg').style.display = 'block'; }
+        } else { 
+            document.getElementById('error-msg').style.display = 'block';
+            document.getElementById('passInput').value = "";
+        }
     }
+
+    function logout() {
+        localStorage.removeItem('map_auth_persistent');
+        sessionStorage.removeItem('map_auth');
+        location.reload();
+    }
+
+    window.onload = () => {
+        if (localStorage.getItem('map_auth_persistent') === 'true' || sessionStorage.getItem('map_auth') === 'true') {
+            showMainContent();
+        }
+    };
 
     function showMainContent() {
         document.getElementById('login-overlay').style.display = 'none';
@@ -170,7 +234,7 @@
     function confirmClear() { if(confirm("Tüm veriler silinecek aşkım?")) globalApp.clearMarkers(); }
 
     function initApp() {
-        const dbName = "MapStore_v85";
+        const dbName = "MapStore_v86";
         let db, savedMarkers = [], customIcon = null;
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
