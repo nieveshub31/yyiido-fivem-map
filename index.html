@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>v</title>
+    <title>yyiido nieves - Map System</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -17,40 +17,28 @@
         
         body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
         
+        /* Sağ Tık Engelleme İçin Global */
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
         /* Giriş Ekranı */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-box { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid var(--primary-color); text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .login-box h2 { color: var(--primary-color); letter-spacing: 2px; margin-bottom: 25px; }
         .login-box input[type="password"] { padding: 15px; width: 100%; border-radius: 8px; border: 1px solid #444; background: #222; color: white; margin-bottom: 20px; box-sizing: border-box; outline: none; }
         .login-box button { width: 100%; padding: 15px; background: var(--primary-color); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; color: #000; transition: 0.3s; }
-        .login-box button:hover { background: #00cc00; transform: translateY(-2px); }
 
-        /* Ana Arayüz */
         #main-content { display: none; }
-        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
+        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; cursor: crosshair; }
 
         /* KNGLRP Butonu */
         #main-logo {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            font-weight: 900;
-            font-size: 16px;
-            letter-spacing: 3px;
-            color: #fff;
-            background: var(--panel-bg);
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: 1px solid var(--primary-color);
-            cursor: pointer;
-            animation: kngl-glow 2s infinite alternate;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: 0.3s;
-            user-select: none;
+            position: fixed; top: 20px; left: 20px; z-index: 1001;
+            font-weight: 900; font-size: 16px; letter-spacing: 3px;
+            color: #fff; background: var(--panel-bg); padding: 10px 20px;
+            border-radius: 8px; border: 1px solid var(--primary-color);
+            cursor: pointer; animation: kngl-glow 2s infinite alternate;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s;
         }
-        #main-logo:hover { transform: scale(1.05); background: #1a222c; }
-
         @keyframes kngl-glow {
             0% { text-shadow: 0 0 2px #fff, 0 0 5px var(--glow-color); box-shadow: 0 0 5px var(--glow-color); }
             100% { text-shadow: 0 0 5px #fff, 0 0 15px var(--glow-color), 0 0 25px var(--primary-color); box-shadow: 0 0 15px var(--primary-color); }
@@ -62,17 +50,18 @@
             background: var(--panel-bg); padding: 25px; border-radius: 16px;
             border: 1px solid var(--border-color); width: 280px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
-            max-height: 75vh; overflow-x: hidden; overflow-y: auto;
+            max-height: 85vh; overflow-y: auto; overflow-x: hidden;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1; transform: translateY(0);
         }
         #controls.collapsed { transform: translateY(-20px) translateX(-350px); opacity: 0; pointer-events: none; }
 
-        .panel-header { font-size: 14px; font-weight: 800; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; }
+        .panel-header { font-size: 13px; font-weight: 800; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; }
         .section { margin-bottom: 20px; }
         .section-title { font-size: 10px; font-weight: 900; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         .input-group { background: var(--input-bg); border-radius: 10px; padding: 12px; border: 1px solid #2a3441; margin-bottom: 10px; }
-        input[type="file"], select { width: 100%; cursor: pointer; background: #2a3441; color: white; border: none; border-radius: 6px; padding: 8px; box-sizing: border-box; outline: none; }
+        
+        input[type="file"], select { width: 100%; cursor: pointer; background: #2a3441; color: white; border: none; border-radius: 6px; padding: 8px; box-sizing: border-box; outline: none; font-size: 12px; }
+        
         .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 15px; border-radius: 10px; border: 1px solid #2a3441; }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -80,19 +69,32 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(22px); }
-        input[type="range"] { width: 100%; accent-color: var(--primary-color); margin-top: 10px; }
-        .btn-action { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; font-size: 11px; }
+
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; font-size: 11px; }
+        .btn-clear { background: #3d2a12; color: #ffaa44; border: 1px solid #5a3e1a; }
+        .btn-clear:hover { background: #5a3e1a; color: #fff; }
         .btn-logout { background: #2a1212; color: #ff5555; border: 1px solid #441a1a; }
 
-        .pixel-marker { border: 2px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.5); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pixel-marker div { width: 100%; height: 100%; background-size: contain !important; background-position: center !important; }
+        /* Yeni Şeffaf Çember İşaretçiler */
+        .pixel-marker { 
+            border: 2px solid white; 
+            border-radius: 50%; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden;
+            background: transparent !important; /* İçini şeffaf yaptık */
+        }
+        .pixel-marker div { 
+            width: 100%; height: 100%; 
+            background-size: cover !important; 
+            background-position: center !important;
+            border-radius: 50%;
+        }
     </style>
 </head>
-<body>
-
-<div id="login-overlay">
+<body oncontextmenu="return false;"> <div id="login-overlay">
     <div class="login-box">
-        <h2>yyiido-nieves - Map System</h2>
+        <h2>SİSTEME GİRİŞ</h2>
         <input type="password" id="passInput" placeholder="Erişim Şifresi">
         <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer; font-size:14px; color:#888;">
             <input type="checkbox" id="rememberCheck"> Beni Hatırla
@@ -104,42 +106,52 @@
 
 <div id="main-content">
     <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
+
     <div id="controls">
         <div class="panel-header">KONTROL PANELİ</div>
+        
         <div class="section">
             <span class="section-title">HARİTA KATMANI</span>
             <div class="input-group"><input type="file" id="mainMapInput" accept="image/*"></div>
         </div>
+
         <div class="section">
             <span class="section-title">İŞARETÇİ AYARLARI</span>
             <div class="input-group">
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
-                    <option value="red">🔴 Kırmızı Kare</option>
-                    <option value="green">🟢 Yeşil Kare</option>
+                    <option value="red">⭕ Kırmızı Çember</option>
+                    <option value="green">⭕ Yeşil Çember</option>
                     <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
                 <input type="range" id="sizeSlider" min="10" max="150" value="40">
             </div>
         </div>
+
         <div class="section">
             <span class="section-title">SİSTEM MODU</span>
             <div class="switch-group">
-                <span style="font-size:13px;">Düzenleme Modu</span>
-                <label class="switch"><input type="checkbox" id="editMode" checked><span class="slider"></span></label>
+                <span style="font-size:12px;">Düzenleme Modu</span>
+                <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
             </div>
         </div>
-        <button class="btn-action btn-logout" onclick="logout()">OTURUMU KAPAT</button>
+
+        <div class="section" style="border-top: 1px solid #333; padding-top: 15px;">
+            <span class="section-title">VERİ YÖNETİMİ</span>
+            <button class="btn-action btn-clear" onclick="clearAllMarkers()">TÜMÜNÜ TEMİZLE</button>
+            <button class="btn-action btn-logout" onclick="logout()">OTURUMU KAPAT</button>
+        </div>
     </div>
+    
     <div id="map"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const _pArr = ['h','a','y','a','t','ç','o','k','z','o','r','y','a'];
+    const _p = ['h','a','y','a','t','ç','o','k','z','o','r','y','a'].join('');
 
     function checkLogin() {
-        if (document.getElementById('passInput').value === _pArr.join('')) {
+        if (document.getElementById('passInput').value === _p) {
             if (document.getElementById('rememberCheck').checked) localStorage.setItem('map_session', 'active');
             else sessionStorage.setItem('map_session', 'active');
             showMainContent();
@@ -158,10 +170,13 @@
 
     function logout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
 
+    let globalApp = null; 
+    function refreshMap() { if(globalApp) globalApp.render(); }
+    function clearAllMarkers() { if(globalApp && confirm("Tüm işaretçiler silinecek, emin misin?")) globalApp.clearMarkers(); }
+
     function initApp() {
         const dbName = "MapStore_v6";
         let db, savedMarkers = [], customIcon = null;
-        // zoomControl: false ile butonları kaldırdık
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
 
@@ -206,35 +221,69 @@
         };
 
         map.on('click', e => {
+            // Düzenleme modu kapalıyken işaret eklemeyi engeller
             if (!mapLayer || !document.getElementById('editMode').checked) return;
-            const markerData = { id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, size: parseInt(document.getElementById('sizeSlider').value), type: document.getElementById('typeSelect').value, img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null };
+            
+            const markerData = { 
+                id: Date.now(), 
+                lat: e.latlng.lat, 
+                lng: e.latlng.lng, 
+                size: parseInt(document.getElementById('sizeSlider').value), 
+                type: document.getElementById('typeSelect').value, 
+                img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null 
+            };
+            
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
             savedMarkers.push(markerData);
             render();
         });
 
-        document.getElementById('editMode').onchange = render;
-
         function render() {
             markerLayer.clearLayers();
             const isEditable = document.getElementById('editMode').checked;
+            
             savedMarkers.forEach(d => {
-                const style = `background-image:${d.img?'url('+d.img+')':'none'}; background-color:${d.type==='red'?'rgba(255,0,0,0.6)':d.type==='green'?'rgba(0,255,0,0.6)':'transparent'}`;
-                const icon = L.divIcon({ className: 'pixel-marker', iconSize: [d.size, d.size], iconAnchor: [d.size/2, d.size/2], html: `<div style="${style}"></div>` });
+                // Şeffaf iç yapı ve renkli kenarlıklar
+                const borderColor = d.type === 'red' ? '#ff4444' : d.type === 'green' ? '#00ff00' : '#fff';
+                const style = `
+                    background-image:${d.img?'url('+d.img+')':'none'}; 
+                    border: 3px solid ${borderColor};
+                    box-shadow: 0 0 10px ${borderColor};
+                `;
+                
+                const icon = L.divIcon({ 
+                    className: 'pixel-marker', 
+                    iconSize: [d.size, d.size], 
+                    iconAnchor: [d.size/2, d.size/2], 
+                    html: `<div style="${style}"></div>` 
+                });
+
                 const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
+                
                 if(isEditable) {
                     m.on('dragend', ev => {
                         const found = savedMarkers.find(x => x.id === d.id);
-                        found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
+                        found.lat = ev.target.getLatLng().lat; 
+                        found.lng = ev.target.getLatLng().lng;
                         db.transaction("markers", "readwrite").objectStore("markers").put(found);
                     });
+                    // Sağ tıkla silme (Fixli: Tarayıcı menüsü açılmaz)
                     m.on('contextmenu', () => {
                         db.transaction("markers", "readwrite").objectStore("markers").delete(d.id);
-                        savedMarkers = savedMarkers.filter(x => x.id !== d.id); render();
+                        savedMarkers = savedMarkers.filter(x => x.id !== d.id); 
+                        render();
                     });
                 }
             });
         }
+
+        function clearMarkers() {
+            db.transaction("markers", "readwrite").objectStore("markers").clear();
+            savedMarkers = [];
+            render();
+        }
+
+        globalApp = { render, clearMarkers };
     }
     document.getElementById('passInput').addEventListener('keypress', e => { if(e.key==='Enter') checkLogin() });
 </script>
