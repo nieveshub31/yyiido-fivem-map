@@ -35,8 +35,19 @@
             border: 1px solid var(--border-color); width: 260px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4); backdrop-filter: blur(10px);
             max-height: 90vh; overflow-y: auto;
+            transition: transform 0.4s ease, left 0.4s ease;
         }
+        #controls.collapsed { transform: translateX(-300px); left: 0; }
         
+        /* Panel Toggle Butonu */
+        #toggle-panel {
+            position: absolute; right: -40px; top: 20px; width: 35px; height: 35px;
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            color: var(--primary-color); display: flex; align-items: center;
+            justify-content: center; border-radius: 0 8px 8px 0; cursor: pointer;
+            font-weight: bold; box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+        }
+
         .panel-header { font-size: 18px; font-weight: bold; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .section { margin-bottom: 20px; }
         .section-title { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
@@ -74,6 +85,7 @@
 
 <div id="main-content">
     <div id="controls">
+        <div id="toggle-panel" onclick="togglePanel()">◀</div>
         <div class="panel-header">KONTROL PANELİ</div>
         <div class="section">
             <span class="section-title">HARİTA KATMANI</span>
@@ -108,23 +120,28 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Şifre: hayat çokzorya (Base64 maskeli hali)
-    const _c = "aGF5YXQgw6dvb3pvcnlh";
+    // Şifre: hayatçokzorya (Dizi olarak saklanarak karakter hatası engellendi)
+    const _keyParts = ['h','a','y','a','t','ç','o','k','z','o','r','y','a'];
 
     function checkLogin() {
-        const p = document.getElementById('passInput').value;
-        const r = document.getElementById('rememberCheck').checked;
+        const input = document.getElementById('passInput').value;
+        const remember = document.getElementById('rememberCheck').checked;
+        const target = _keyParts.join('');
         
-        // UTF-8 uyumlu güvenli karşılaştırma
-        const encoded = btoa(encodeURIComponent(p).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
-        
-        if (encoded === _c) {
-            if (r) localStorage.setItem('map_session', 'active');
+        if (input === target) {
+            if (remember) localStorage.setItem('map_session', 'active');
             else sessionStorage.setItem('map_session', 'active');
             showMainContent();
         } else { 
             document.getElementById('error-msg').style.display = 'block'; 
         }
+    }
+
+    function togglePanel() {
+        const panel = document.getElementById('controls');
+        const btn = document.getElementById('toggle-panel');
+        panel.classList.toggle('collapsed');
+        btn.innerText = panel.classList.contains('collapsed') ? '▶' : '◀';
     }
 
     function showMainContent() {
