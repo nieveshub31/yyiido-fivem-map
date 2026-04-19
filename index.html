@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System v1.0</title>
+    <title>yyiido nieves - Map System v8.7</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --primary-color: #00ff00;
             --danger-color: #ff4444;
+            --info-color: #00d4ff;
             --bg-dark: #080c10;
             --panel-bg: rgba(13, 17, 23, 0.96);
             --border-color: #21262d;
@@ -17,75 +18,57 @@
             --text-muted: #8b949e;
         }
         
-        /* Tam Ekran Crosshair */
         body, html, #map, .leaflet-container, * { cursor: crosshair !important; }
-        
-        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--text-main); overflow: hidden; }
+        body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', Roboto, sans-serif; color: var(--text-main); overflow: hidden; }
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
 
-        /* Modern Giriş Ekranı */
+        /* Giriş Ekranı */
         #login-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: radial-gradient(circle at center, #111b27 0%, #080c10 100%); 
             z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
         .login-box { 
-            background: rgba(22, 27, 34, 0.8); 
-            padding: 50px 40px; 
-            border-radius: 24px; 
-            border: 1px solid rgba(48, 54, 61, 0.5); 
-            text-align: center; width: 380px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
-            backdrop-filter: blur(20px);
+            background: rgba(22, 27, 34, 0.8); padding: 50px 40px; border-radius: 24px; 
+            border: 1px solid rgba(48, 54, 61, 0.5); text-align: center; width: 380px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); backdrop-filter: blur(20px);
         }
-        .login-box h2 { 
-            color: #fff; letter-spacing: 4px; margin-bottom: 30px; 
-            font-size: 22px; font-weight: 900; text-transform: uppercase;
-            text-shadow: 0 0 15px rgba(255,255,255,0.2);
-        }
+        .login-box h2 { color: #fff; letter-spacing: 4px; margin-bottom: 30px; font-size: 22px; font-weight: 900; text-transform: uppercase; }
         .login-box input[type="password"] { 
-            padding: 18px; width: 100%; border-radius: 12px; 
-            border: 1px solid #30363d; background: #0d1117; 
-            color: white; margin-bottom: 15px; outline: none; 
-            transition: 0.3s; cursor: text !important;
-            text-align: center; letter-spacing: 2px;
+            padding: 18px; width: 100%; border-radius: 12px; border: 1px solid #30363d; 
+            background: #0d1117; color: white; margin-bottom: 15px; outline: none; text-align: center;
         }
-        .login-box input[type="password"]:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
-        }
-        
-        .remember-me {
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; margin-bottom: 25px; color: var(--text-muted);
-            font-size: 13px; cursor: pointer !important;
-        }
-        .remember-me input { accent-color: var(--primary-color); cursor: pointer !important; }
-
         .login-box button { 
-            width: 100%; padding: 18px; background: var(--primary-color); 
-            border: none; font-weight: 900; border-radius: 12px; 
-            color: #000; transition: 0.3s; text-transform: uppercase; 
-            letter-spacing: 2px; box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
-        }
-        .login-box button:hover { 
-            background: #00ff00; transform: translateY(-2px); 
-            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+            width: 100%; padding: 18px; background: var(--primary-color); border: none; 
+            font-weight: 900; border-radius: 12px; color: #000; transition: 0.3s; text-transform: uppercase; 
         }
 
-        /* Ana İçerik */
         #main-content { display: none; }
         #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
-        /* KNGLRP Logo */
-        #main-logo {
-            position: fixed; top: 15px; left: 15px; z-index: 1001;
-            font-weight: 900; font-size: 15px; letter-spacing: 3px;
-            color: #fff; background: var(--panel-bg); padding: 10px 18px;
-            border-radius: 8px; border: 1px solid #30363d;
-            transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        /* Logo ve Yardım Butonu */
+        .top-controls { position: fixed; top: 15px; left: 15px; z-index: 1001; display: flex; gap: 10px; }
+        #main-logo, #help-btn {
+            font-weight: 900; font-size: 15px; color: #fff; background: var(--panel-bg); 
+            padding: 10px 18px; border-radius: 8px; border: 1px solid #30363d; 
+            transition: 0.3s; cursor: pointer !important; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+        #main-logo { letter-spacing: 3px; }
+        #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        #help-btn { color: var(--info-color); border-color: rgba(0, 212, 255, 0.3); }
+        #help-btn:hover { background: var(--info-color); color: #000; }
+
+        /* Bilgi Paneli (Guide) */
+        #guide-panel {
+            position: fixed; top: 70px; left: 290px; z-index: 1000;
+            background: var(--panel-bg); padding: 20px; border-radius: 12px;
+            border: 1px solid var(--info-color); width: 280px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+            display: none; transform: translateY(-10px); transition: 0.3s;
+        }
+        #guide-panel.active { display: block; transform: translateY(0); }
+        .guide-item { margin-bottom: 12px; font-size: 12px; line-height: 1.5; }
+        .guide-key { color: var(--primary-color); font-weight: bold; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 4px; }
 
         /* Sol Panel */
         #controls {
@@ -93,99 +76,96 @@
             background: var(--panel-bg); padding: 20px; border-radius: 12px;
             border: 1px solid var(--border-color); width: 260px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.6); backdrop-filter: blur(15px);
-            max-height: 85vh; overflow-y: auto; overflow-x: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 85vh; overflow-y: auto; transition: 0.4s;
         }
         #controls.collapsed { transform: translateX(-300px); opacity: 0; pointer-events: none; }
 
-        .panel-header { font-size: 12px; font-weight: 800; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .section { margin-bottom: 18px; }
-        .section-title { font-size: 9px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
-        .input-group { background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid #21262d; margin-bottom: 8px; }
+        .panel-header { font-size: 11px; font-weight: 800; color: var(--primary-color); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; text-transform: uppercase; }
+        .section { margin-bottom: 15px; }
+        .section-title { font-size: 9px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .input-group { background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid #21262d; }
         
-        input[type="file"], select { width: 100%; background: #0d1117; color: var(--text-main); border: 1px solid #30363d; border-radius: 6px; padding: 7px; outline: none; font-size: 11px; }
+        select, input[type="file"] { width: 100%; background: #0d1117; color: var(--text-main); border: 1px solid #30363d; border-radius: 6px; padding: 6px; font-size: 11px; outline: none; }
         
-        .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 10px; border-radius: 8px; border: 1px solid #21262d; margin-bottom: 6px; }
-        .switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+        .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 8px 10px; border-radius: 8px; border: 1px solid #21262d; margin-bottom: 5px; }
+        .switch { position: relative; width: 34px; height: 18px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer !important; top: 0; left: 0; right: 0; bottom: 0; background-color: #30363d; transition: .3s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: #8b949e; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(18px); background-color: #000; }
+        .slider { position: absolute; cursor: pointer !important; top: 0; left: 0; right: 0; bottom: 0; background: #30363d; border-radius: 20px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background: #8b949e; border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(16px); background: #000; }
 
-        input[type="range"] { width: 100%; accent-color: var(--primary-color); margin-top: 8px; }
-
-        .btn-action { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; margin-top: 8px; text-transform: uppercase; font-size: 10px; }
+        .btn-action { width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 10px; text-transform: uppercase; cursor: pointer !important; transition: 0.2s; }
         .btn-clear { background: rgba(244, 67, 54, 0.1); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.4); }
         .btn-clear:hover { background: #f44336; color: #fff; }
 
         /* Marker Stilleri */
         .pixel-marker { border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent !important; }
         .pixel-marker div { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; }
-        
-        .fill-red { border: 3px solid var(--danger-color); background-color: rgba(255, 68, 68, 0.35) !important; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .fill-green { border: 3px solid var(--primary-color); background-color: rgba(0, 255, 0, 0.35) !important; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .hollow-black { border: 3px solid #000000; background-color: transparent !important; box-shadow: 0 0 5px rgba(255,255,255,0.2); }
+        .fill-red { border: 3px solid var(--danger-color); background: rgba(255, 68, 68, 0.3) !important; }
+        .fill-green { border: 3px solid var(--primary-color); background: rgba(0, 255, 0, 0.3) !important; }
+        .hollow-black { border: 3px solid #000; background: transparent !important; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>yyiido nieves - Map System</h2>
+        <h2>Sisteme Giriş</h2>
         <input type="password" id="passInput" placeholder="••••••••••••••">
-        <label class="remember-me">
-            <input type="checkbox" id="rememberCheck"> Beni Hatırla
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:20px; cursor:pointer; font-size:13px; color:var(--text-muted);">
+            <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color)"> Beni Hatırla
         </label>
         <button onclick="checkLogin()">KİLİDİ AÇ</button>
-        <p id="error-msg" style="color:var(--danger-color); font-size:11px; margin-top:15px; display:none; font-weight:bold; letter-spacing: 1px;">Erişim Reddedildi!</p>
     </div>
 </div>
 
 <div id="main-content">
-    <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
+    <div class="top-controls">
+        <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
+        <div id="help-btn" onclick="toggleGuide()">?</div>
+    </div>
+
+    <div id="guide-panel">
+        <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">Kullanım Kılavuzu</div>
+        <div class="guide-item"><span class="guide-key">Sol Tık</span> Haritaya yeni işaretçi ekler.</div>
+        <div class="guide-item"><span class="guide-key">Sağ Tık</span> İşaretçiyi haritadan siler.</div>
+        <div class="guide-item"><span class="guide-key">Sürükle</span> İşaretçinin yerini değiştirir (Düzenleme modu açıkken).</div>
+        <div class="guide-item"><span class="guide-key">Ekleme Modu</span> Kapalıyken haritayı mouse ile kaydırabilirsiniz.</div>
+        <div class="guide-item"><span class="guide-key">Siyah Çember</span> Bu seçenek içi boş, şeffaf halka oluşturur.</div>
+        <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">ANLADIM</button>
+    </div>
 
     <div id="controls">
         <div class="panel-header">KONTROL PANELİ</div>
-        
         <div class="section">
-            <span class="section-title">HARİTA KATMANI</span>
+            <span class="section-title">HARİTA YÜKLE</span>
             <div class="input-group"><input type="file" id="mainMapInput" accept="image/*"></div>
         </div>
-
         <div class="section">
             <span class="section-title">İŞARETÇİ AYARLARI</span>
             <div class="input-group">
-                <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:10px">
                 <select id="typeSelect">
                     <option value="green">🟢 Yeşil (Şeffaf Dolgu)</option>
                     <option value="red">🔴 Kırmızı (Şeffaf Dolgu)</option>
                     <option value="black">⚫ Siyah (İçi Boş)</option>
-                    <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
-                <div style="margin-top: 10px;">
-                    <span style="font-size:9px; color:var(--text-muted); text-transform:uppercase;">Boyut</span>
-                    <input type="range" id="sizeSlider" min="15" max="150" value="45">
-                </div>
+                <input type="range" id="sizeSlider" min="15" max="150" value="45" style="width:100%; margin-top:10px;">
             </div>
         </div>
-
         <div class="section">
-            <span class="section-title">MOD KONTROLLERİ</span>
+            <span class="section-title">MODLAR</span>
             <div class="switch-group">
-                <span style="font-size:11px;">Düzenleme</span>
+                <span>Düzenleme</span>
                 <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
             </div>
             <div class="switch-group">
-                <span style="font-size:11px; color:var(--primary-color); font-weight:bold;">EKLEME</span>
+                <span style="color:var(--primary-color)">EKLEME</span>
                 <label class="switch"><input type="checkbox" id="addMode" checked><span class="slider"></span></label>
             </div>
         </div>
-
-        <div class="section">
-            <button class="btn-action btn-clear" onclick="confirmClear()">TÜMÜNÜ SİL</button>
-            <button class="btn-action" style="background:#21262d; color:#8b949e; border:1px solid #30363d; margin-top:10px;" onclick="logout()">OTURUMU KAPAT</button>
-        </div>
+        <button class="btn-action btn-clear" onclick="confirmClear()">TÜMÜNÜ SİL</button>
+        <button class="btn-action" style="background:#21262d; color:#8b949e; margin-top:8px;" onclick="logout()">ÇIKIŞ YAP</button>
     </div>
     
     <div id="map"></div>
@@ -193,33 +173,15 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Şifre: knglrpsikersakatbırakır
     const _p = "knglrpsikersakatbırakır";
 
     function checkLogin() {
         if (document.getElementById('passInput').value === _p) {
-            if (document.getElementById('rememberCheck').checked) {
-                localStorage.setItem('map_auth_persistent', 'true');
-            }
+            if (document.getElementById('rememberCheck').checked) localStorage.setItem('map_auth_persistent', 'true');
             sessionStorage.setItem('map_auth', 'true');
             showMainContent();
-        } else { 
-            document.getElementById('error-msg').style.display = 'block';
-            document.getElementById('passInput').value = "";
-        }
+        } else { alert("Hatalı Şifre!"); }
     }
-
-    function logout() {
-        localStorage.removeItem('map_auth_persistent');
-        sessionStorage.removeItem('map_auth');
-        location.reload();
-    }
-
-    window.onload = () => {
-        if (localStorage.getItem('map_auth_persistent') === 'true' || sessionStorage.getItem('map_auth') === 'true') {
-            showMainContent();
-        }
-    };
 
     function showMainContent() {
         document.getElementById('login-overlay').style.display = 'none';
@@ -228,14 +190,18 @@
     }
 
     function togglePanel() { document.getElementById('controls').classList.toggle('collapsed'); }
+    function toggleGuide() { document.getElementById('guide-panel').classList.toggle('active'); }
+    function logout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
 
-    let globalApp = null; 
+    window.onload = () => { if (localStorage.getItem('map_auth_persistent') === 'true' || sessionStorage.getItem('map_auth') === 'true') showMainContent(); };
+
+    let globalApp = null;
     function refreshMap() { if(globalApp) globalApp.render(); }
-    function confirmClear() { if(confirm("Tüm veriler silinecek aşkım?")) globalApp.clearMarkers(); }
+    function confirmClear() { if(confirm("Tüm verileri silinecek aşkım?")) globalApp.clearMarkers(); }
 
     function initApp() {
-        const dbName = "MapStore_v86";
-        let db, savedMarkers = [], customIcon = null;
+        const dbName = "MapStore_v87";
+        let db, savedMarkers = [];
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
 
@@ -273,19 +239,12 @@
             reader.readAsDataURL(e.target.files[0]);
         };
 
-        document.getElementById('markerImgInput').onchange = e => {
-            const reader = new FileReader();
-            reader.onload = ev => { customIcon = ev.target.result; document.getElementById('typeSelect').value = 'custom_img'; };
-            reader.readAsDataURL(e.target.files[0]);
-        };
-
         map.on('click', e => {
             if (!mapLayer || !document.getElementById('addMode').checked) return;
             const markerData = { 
                 id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
-                type: document.getElementById('typeSelect').value,
-                img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null
+                type: document.getElementById('typeSelect').value
             };
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
             savedMarkers.push(markerData);
@@ -296,13 +255,12 @@
             markerLayer.clearLayers();
             const isEditable = document.getElementById('editMode').checked;
             savedMarkers.forEach(d => {
-                let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
-                const style = d.img ? `background-image:url(${d.img});` : '';
+                let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : 'hollow-black');
                 const icon = L.divIcon({ 
                     className: `pixel-marker ${mClass}`, 
                     iconSize: [d.size, d.size], 
                     iconAnchor: [d.size/2, d.size/2],
-                    html: `<div style="${style}"></div>`
+                    html: '<div></div>'
                 });
                 const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
                 if(isEditable) {
@@ -319,13 +277,9 @@
                 }
             });
         }
-
-        globalApp = { render, clearMarkers: () => {
-            db.transaction("markers", "readwrite").objectStore("markers").clear();
-            savedMarkers = []; render();
-        }};
+        globalApp = { render, clearMarkers: () => { db.transaction("markers", "readwrite").objectStore("markers").clear(); savedMarkers = []; render(); }};
     }
-    document.getElementById('passInput').addEventListener('keypress', e => { if(e.key==='Enter') checkLogin() });
+    document.getElementById('passInput').onkeypress = e => { if(e.key==='Enter') checkLogin() };
 </script>
 </body>
 </html>
