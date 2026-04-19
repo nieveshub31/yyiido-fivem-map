@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System v9.1 (Mizah Edition)</title>
+    <title>yyiido nieves - Map System v1.0</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     <style>
@@ -115,12 +115,12 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>HOŞGELDİN CANIMIN İÇİ</h2>
-        <input type="password" id="passInput" placeholder="ŞİFREYİ SALLA BAKALIM">
+        <h2>HOŞGELDİN AŞKIM</h2>
+        <input type="password" id="passInput" placeholder="ÇOK ZOR ŞİFRE">
         <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:25px; cursor:pointer; font-size:14px; color:var(--text-muted); font-weight: 700;">
             <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color); width:16px; height:16px;"> Beni Hatırla (Vefasız Değilsen)
         </label>
-        <button onclick="checkLogin()">KAPIYI TIKLAT</button>
+        <button onclick="checkLogin()">GİRİŞ</button>
     </div>
 </div>
 
@@ -134,14 +134,16 @@
         <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">BAK BURASI ÖNEMLİ</div>
         <div class="guide-item"><span class="guide-key">SOL TIK</span> İstediğin yere bir "ben buradayım" kondurur.</div>
         <div class="guide-item"><span class="guide-key">SAĞ TIK</span> Yanlış mı bastın? Gönder gitsin, siler.</div>
-        <div class="guide-item"><span class="guide-key">DRAG</span> İşaretçiyi alıp başka bahara taşırsın.</div>
-        <div class="guide-item"><span class="guide-key">SİYAH</span> İçi boş halka; yani "burada bir şeyler dönecek ama dur bakalım" modu.</div>
+        <div class="guide-item"><span class="guide-key">SÜRÜKLE</span> İşaretçiyi alıp haritada gezdirirsin</div>
+        <div class="guide-item"><span class="guide-key">BOŞ SİYAH</span> BURDA BİŞEYLER DÖNECEK HADİ BAKALIM</div>
+        <div class="guide-item"><span class="guide-key">YEŞİL</span> BURDA SANIRIM ONEMLİ Bİ YER VAR</div>
+        <div class="guide-item"><span class="guide-key">KIRMIZI</span> BURADA BİŞEY YOK AQ</div>
         <div class="guide-item"><span class="guide-key">DİKKAT</span> Haritada gezeceksen "Ekleme" düğmesini kapat, her yeri çiçek bahçesine çevirme!</div>
         <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">OKEYDİR CANIM</button>
     </div>
 
     <div id="controls">
-        <div class="panel-header">OYUN ALANI</div>
+        <div class="panel-header">YYİİDO NİEVES</div>
         
         <div class="section">
             <span class="section-title">MANZARA (HARİTA)</span>
@@ -153,23 +155,23 @@
             <div class="input-group">
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
-                    <option value="green">🟢 ŞÖYLE Bİ' YEŞİL</option>
+                    <option value="green">🟢 ŞÖYLE Bİ YEŞİL</option>
                     <option value="red">🔴 ACİL DURUM KIRMIZISI</option>
-                    <option value="black">⚫ SİMSİYAH BİR HALKA</option>
-                    <option value="custom_img">🖼️ KENDİ FOTON (ŞIK DURUR)</option>
+                    <option value="black">⚫ SİYAH SIRADAN BİR HALKA</option>
+                    <option value="custom_img">🖼️ ÖZEL SİMGE (ŞIK DURUR)</option>
                 </select>
                 <input type="range" id="sizeSlider" min="15" max="150" value="45" style="margin-top:10px; width:100%;">
             </div>
         </div>
 
         <div class="section">
-            <span class="section-title">NEREDEYİZ?</span>
+            <span class="section-title">SIRADAN AYAR</span>
             <div class="switch-group">
                 <span>DÜZENLEME</span>
                 <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
             </div>
             <div class="switch-group">
-                <span style="color:var(--primary-color)">EKLEME AÇIK</span>
+                <span style="color:var(--primary-color)">EKLEME AÇ/KAPA</span>
                 <label class="switch"><input type="checkbox" id="addMode" checked><span class="slider"></span></label>
             </div>
         </div>
