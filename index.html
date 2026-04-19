@@ -13,14 +13,13 @@
             --border-color: #333;
             --input-bg: #1a222c;
             --glow-color: rgba(0, 255, 0, 0.8);
+            --danger: #ff4444;
         }
         
         body { margin: 0; padding: 0; background: var(--bg-dark); font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden; }
-        
-        /* Sağ Tık Engelleme İçin Global */
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 
-        /* Giriş Ekranı */
+        /* Giriş */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-box { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid var(--primary-color); text-align: center; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .login-box h2 { color: var(--primary-color); letter-spacing: 2px; margin-bottom: 25px; }
@@ -28,9 +27,9 @@
         .login-box button { width: 100%; padding: 15px; background: var(--primary-color); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; color: #000; transition: 0.3s; }
 
         #main-content { display: none; }
-        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; cursor: crosshair; }
+        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
-        /* KNGLRP Butonu */
+        /* KNGLRP Logo Buton */
         #main-logo {
             position: fixed; top: 20px; left: 20px; z-index: 1001;
             font-weight: 900; font-size: 16px; letter-spacing: 3px;
@@ -44,7 +43,7 @@
             100% { text-shadow: 0 0 5px #fff, 0 0 15px var(--glow-color), 0 0 25px var(--primary-color); box-shadow: 0 0 15px var(--primary-color); }
         }
 
-        /* Sol Kontrol Paneli */
+        /* Panel */
         #controls {
             position: fixed; top: 80px; left: 20px; z-index: 1000;
             background: var(--panel-bg); padding: 25px; border-radius: 16px;
@@ -71,30 +70,22 @@
         input:checked + .slider:before { transform: translateX(22px); }
 
         .btn-action { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; font-size: 11px; }
-        .btn-clear { background: #3d2a12; color: #ffaa44; border: 1px solid #5a3e1a; }
-        .btn-clear:hover { background: #5a3e1a; color: #fff; }
-        .btn-logout { background: #2a1212; color: #ff5555; border: 1px solid #441a1a; }
+        .btn-clear { background: rgba(255, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-clear:hover { background: var(--danger); color: #fff; }
+        .btn-backup { background: rgba(0, 255, 0, 0.1); color: var(--primary-color); border: 1px solid var(--primary-color); }
+        .btn-backup:hover { background: var(--primary-color); color: #000; }
+        .btn-logout { background: #2a1212; color: #ff5555; border: 1px solid #441a1a; margin-top: 20px; }
 
-        /* Yeni Şeffaf Çember İşaretçiler */
-        .pixel-marker { 
-            border: 2px solid white; 
-            border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.8);
-            display: flex; align-items: center; justify-content: center; 
-            overflow: hidden;
-            background: transparent !important; /* İçini şeffaf yaptık */
-        }
-        .pixel-marker div { 
-            width: 100%; height: 100%; 
-            background-size: cover !important; 
-            background-position: center !important;
-            border-radius: 50%;
-        }
+        /* Marker Styles */
+        .pixel-marker { border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.8); background: transparent !important; }
+        .pixel-marker div { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; }
     </style>
 </head>
-<body oncontextmenu="return false;"> <div id="login-overlay">
+<body oncontextmenu="return false;">
+
+<div id="login-overlay">
     <div class="login-box">
-        <h2>SİSTEME GİRİŞ</h2>
+        <h2>yyiido nieves - Map System</h2>
         <input type="password" id="passInput" placeholder="Erişim Şifresi">
         <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer; font-size:14px; color:#888;">
             <input type="checkbox" id="rememberCheck"> Beni Hatırla
@@ -122,6 +113,7 @@
                 <select id="typeSelect">
                     <option value="red">⭕ Kırmızı Çember</option>
                     <option value="green">⭕ Yeşil Çember</option>
+                    <option value="black">⭕ Siyah Çember</option>
                     <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
                 <input type="range" id="sizeSlider" min="10" max="150" value="40">
@@ -132,13 +124,17 @@
             <span class="section-title">SİSTEM MODU</span>
             <div class="switch-group">
                 <span style="font-size:12px;">Düzenleme Modu</span>
-                <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
+                <label class="switch">
+                    <input type="checkbox" id="editMode" checked onchange="refreshMap()">
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
 
         <div class="section" style="border-top: 1px solid #333; padding-top: 15px;">
             <span class="section-title">VERİ YÖNETİMİ</span>
-            <button class="btn-action btn-clear" onclick="clearAllMarkers()">TÜMÜNÜ TEMİZLE</button>
+            <button class="btn-action btn-backup" onclick="alert('Veriler yerel tarayıcı belleğine (IndexedDB) kaydedildi.')">VERİLERİ YEDEKLE</button>
+            <button class="btn-action btn-clear" onclick="confirmClear()">TÜMÜNÜ SİL</button>
             <button class="btn-action btn-logout" onclick="logout()">OTURUMU KAPAT</button>
         </div>
     </div>
@@ -172,7 +168,12 @@
 
     let globalApp = null; 
     function refreshMap() { if(globalApp) globalApp.render(); }
-    function clearAllMarkers() { if(globalApp && confirm("Tüm işaretçiler silinecek, emin misin?")) globalApp.clearMarkers(); }
+    
+    function confirmClear() {
+        if(confirm("DİKKAT! Tüm işaretçiler kalıcı olarak silinecek. Emin misin aşkım?")) {
+            if(globalApp) globalApp.clearMarkers();
+        }
+    }
 
     function initApp() {
         const dbName = "MapStore_v6";
@@ -221,13 +222,11 @@
         };
 
         map.on('click', e => {
-            // Düzenleme modu kapalıyken işaret eklemeyi engeller
+            // Düzenleme kapalıyken tıklama ile işaretçi eklenmez, harita yine de kaydırılabilir.
             if (!mapLayer || !document.getElementById('editMode').checked) return;
             
             const markerData = { 
-                id: Date.now(), 
-                lat: e.latlng.lat, 
-                lng: e.latlng.lng, 
+                id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
                 type: document.getElementById('typeSelect').value, 
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null 
@@ -243,12 +242,15 @@
             const isEditable = document.getElementById('editMode').checked;
             
             savedMarkers.forEach(d => {
-                // Şeffaf iç yapı ve renkli kenarlıklar
-                const borderColor = d.type === 'red' ? '#ff4444' : d.type === 'green' ? '#00ff00' : '#fff';
+                let borderColor = '#ffffff';
+                if (d.type === 'red') borderColor = '#ff4444';
+                else if (d.type === 'green') borderColor = '#00ff00';
+                else if (d.type === 'black') borderColor = '#000000';
+
                 const style = `
                     background-image:${d.img?'url('+d.img+')':'none'}; 
                     border: 3px solid ${borderColor};
-                    box-shadow: 0 0 10px ${borderColor};
+                    box-shadow: 0 0 10px ${borderColor === '#000000' ? 'rgba(255,255,255,0.2)' : borderColor};
                 `;
                 
                 const icon = L.divIcon({ 
@@ -263,11 +265,9 @@
                 if(isEditable) {
                     m.on('dragend', ev => {
                         const found = savedMarkers.find(x => x.id === d.id);
-                        found.lat = ev.target.getLatLng().lat; 
-                        found.lng = ev.target.getLatLng().lng;
+                        found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
                         db.transaction("markers", "readwrite").objectStore("markers").put(found);
                     });
-                    // Sağ tıkla silme (Fixli: Tarayıcı menüsü açılmaz)
                     m.on('contextmenu', () => {
                         db.transaction("markers", "readwrite").objectStore("markers").delete(d.id);
                         savedMarkers = savedMarkers.filter(x => x.id !== d.id); 
