@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System v9.0 (Racon Edition)</title>
+    <title>yyiido nieves - Map System v9.1 (Mizah Edition)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     <style>
@@ -36,7 +36,7 @@
             border: 1px solid rgba(48, 54, 61, 0.5); text-align: center; width: 400px; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.8); backdrop-filter: blur(25px);
         }
-        .login-box h2 { color: #fff; letter-spacing: 5px; margin-bottom: 30px; font-size: 22px; font-weight: 900; font-family: var(--font-tech); }
+        .login-box h2 { color: #fff; letter-spacing: 5px; margin-bottom: 30px; font-size: 20px; font-weight: 900; font-family: var(--font-tech); }
         .login-box input[type="password"] { 
             padding: 18px; width: 100%; border-radius: 12px; border: 1px solid var(--border-color); 
             background: var(--input-bg); color: white; margin-bottom: 15px; outline: none; 
@@ -61,9 +61,8 @@
         }
         #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
         #help-btn { color: var(--info-color); border-color: rgba(0, 212, 255, 0.3); }
-        #help-btn:hover { background: var(--info-color); color: #000; }
 
-        /* Kılavuz Paneli (Tamir Edildi) */
+        /* Kılavuz Paneli */
         #guide-panel {
             position: fixed; top: 75px; left: 15px; z-index: 2000;
             background: var(--panel-bg); padding: 25px; border-radius: 15px;
@@ -81,11 +80,11 @@
             background: var(--panel-bg); padding: 24px; border-radius: 16px;
             border: 1px solid var(--border-color); width: 275px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.7); backdrop-filter: blur(20px);
-            max-height: 85vh; overflow-y: auto; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 85vh; overflow-y: auto; transition: 0.4s;
         }
         #controls.collapsed { transform: translateX(-320px); opacity: 0; pointer-events: none; }
 
-        .panel-header { font-family: var(--font-tech); font-size: 11px; font-weight: 800; color: var(--primary-color); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .panel-header { font-family: var(--font-tech); font-size: 11px; font-weight: 800; color: var(--primary-color); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; }
         .section { margin-bottom: 20px; }
         .section-title { font-family: var(--font-tech); font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
         .input-group { background: var(--input-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--border-color); }
@@ -116,12 +115,12 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>SİSTEME ÇÖK</h2>
-        <input type="password" id="passInput" placeholder="RACONU KES ŞİFREYİ YAZ">
+        <h2>HOŞGELDİN CANIMIN İÇİ</h2>
+        <input type="password" id="passInput" placeholder="ŞİFREYİ SALLA BAKALIM">
         <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:25px; cursor:pointer; font-size:14px; color:var(--text-muted); font-weight: 700;">
-            <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color); width:16px; height:16px;"> Beni Hatırla (Beni Unutma Aşkım)
+            <input type="checkbox" id="rememberCheck" style="accent-color:var(--primary-color); width:16px; height:16px;"> Beni Hatırla (Vefasız Değilsen)
         </label>
-        <button onclick="checkLogin()">KİLİDİ PATLAT</button>
+        <button onclick="checkLogin()">KAPIYI TIKLAT</button>
     </div>
 </div>
 
@@ -132,52 +131,52 @@
     </div>
 
     <div id="guide-panel">
-        <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">OPERASYON REHBERİ</div>
-        <div class="guide-item"><span class="guide-key">SOL TIK</span> Hedefe işaretçi çakar.</div>
-        <div class="guide-item"><span class="guide-key">SAĞ TIK</span> İşaretçinin biletini keser (siler).</div>
-        <div class="guide-item"><span class="guide-key">DRAG</span> Elemanı yeni mekana sürükler.</div>
-        <div class="guide-item"><span class="guide-key">SİYAH</span> Şeffaf, içi boş pusu halkasıdır.</div>
-        <div class="guide-item"><span class="guide-key">NOT</span> Haritayı gezmek için "Ekleme" modunu kapat, yoksa her yere marker basarsın aşkım.</div>
-        <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">EYVALLAH</button>
+        <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">BAK BURASI ÖNEMLİ</div>
+        <div class="guide-item"><span class="guide-key">SOL TIK</span> İstediğin yere bir "ben buradayım" kondurur.</div>
+        <div class="guide-item"><span class="guide-key">SAĞ TIK</span> Yanlış mı bastın? Gönder gitsin, siler.</div>
+        <div class="guide-item"><span class="guide-key">DRAG</span> İşaretçiyi alıp başka bahara taşırsın.</div>
+        <div class="guide-item"><span class="guide-key">SİYAH</span> İçi boş halka; yani "burada bir şeyler dönecek ama dur bakalım" modu.</div>
+        <div class="guide-item"><span class="guide-key">DİKKAT</span> Haritada gezeceksen "Ekleme" düğmesini kapat, her yeri çiçek bahçesine çevirme!</div>
+        <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">OKEYDİR CANIM</button>
     </div>
 
     <div id="controls">
-        <div class="panel-header">OPERASYON MERKEZİ</div>
+        <div class="panel-header">OYUN ALANI</div>
         
         <div class="section">
-            <span class="section-title">MEKAN GÖRSELİ (MAP)</span>
+            <span class="section-title">MANZARA (HARİTA)</span>
             <div class="input-group"><input type="file" id="mainMapInput" accept="image/*"></div>
         </div>
 
         <div class="section">
-            <span class="section-title">MARKER YAPILANDIRMA</span>
+            <span class="section-title">İŞARETÇİ STİLİ</span>
             <div class="input-group">
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
-                    <option value="green">🟢 GÜVENLİ BÖLGE (Yeşil)</option>
-                    <option value="red">🔴 ÇATIŞMA ALANI (Kırmızı)</option>
-                    <option value="black">⚫ PUSU HALKASI (Siyah)</option>
-                    <option value="custom_img">🖼️ ÖZEL FOTOĞRAF</option>
+                    <option value="green">🟢 ŞÖYLE Bİ' YEŞİL</option>
+                    <option value="red">🔴 ACİL DURUM KIRMIZISI</option>
+                    <option value="black">⚫ SİMSİYAH BİR HALKA</option>
+                    <option value="custom_img">🖼️ KENDİ FOTON (ŞIK DURUR)</option>
                 </select>
                 <input type="range" id="sizeSlider" min="15" max="150" value="45" style="margin-top:10px; width:100%;">
             </div>
         </div>
 
         <div class="section">
-            <span class="section-title">MODLAR</span>
+            <span class="section-title">NEREDEYİZ?</span>
             <div class="switch-group">
                 <span>DÜZENLEME</span>
                 <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
             </div>
             <div class="switch-group">
-                <span style="color:var(--primary-color)">EKLEME AKTİF</span>
+                <span style="color:var(--primary-color)">EKLEME AÇIK</span>
                 <label class="switch"><input type="checkbox" id="addMode" checked><span class="slider"></span></label>
             </div>
         </div>
 
         <div class="section">
-            <button class="btn-action btn-clear" onclick="confirmClear()">MEKANI TEMİZLE (SİL)</button>
-            <button class="btn-action" style="background:#21262d; color:#8b949e; margin-top:12px; border:1px solid #30363d;" onclick="logout()">KAÇAYIM BEN (ÇIKIŞ)</button>
+            <button class="btn-action btn-clear" onclick="confirmClear()">HER ŞEYİ SIFIRLA (EYVAH!)</button>
+            <button class="btn-action" style="background:#21262d; color:#8b949e; margin-top:12px; border:1px solid #30363d;" onclick="logout()">KAÇTIM BEN!</button>
         </div>
     </div>
     
@@ -194,7 +193,7 @@
             sessionStorage.setItem('map_auth', 'true');
             showMainContent();
         } else { 
-            alert("LAN! Yanlış şifre girdin, sızmaya mı çalışıyorsun?"); 
+            alert("Hop! Yanlış şifre. Hafıza kartın mı doldu aşkım? Bir daha dene."); 
             document.getElementById('passInput').value = "";
         }
     }
@@ -206,13 +205,12 @@
     }
 
     function toggleGuide() { 
-        const guide = document.getElementById('guide-panel');
-        guide.classList.toggle('active');
+        document.getElementById('guide-panel').classList.toggle('active');
     }
 
     window.onload = () => { if (localStorage.getItem('map_auth_persistent') === 'true' || sessionStorage.getItem('map_auth') === 'true') showMainContent(); };
     function logout() { 
-        if(confirm("Gidiyor musun aşkım? Gözüm yolda kalır...")) {
+        if(confirm("Gidiyor musun gerçekten? Bak harita sensiz çok ıssız kalır...")) {
             localStorage.clear(); sessionStorage.clear(); location.reload(); 
         }
     }
@@ -220,10 +218,10 @@
 
     let globalApp = null;
     function refreshMap() { if(globalApp) globalApp.render(); }
-    function confirmClear() { if(confirm("Tüm operasyon verilerini çöpe atıyorum? Emin misin reis?")) globalApp.clearMarkers(); }
+    function confirmClear() { if(confirm("Bütün emeğimizi tek tıkla siliyoruz yani? Ciddi misin?")) globalApp.clearMarkers(); }
 
     function initApp() {
-        const dbName = "MapStore_v90";
+        const dbName = "MapStore_v91";
         let db, savedMarkers = [], customIcon = null;
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
