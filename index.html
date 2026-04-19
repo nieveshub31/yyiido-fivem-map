@@ -85,7 +85,8 @@
         .section-title { font-family: var(--font-tech); font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
         .input-group { background: var(--input-bg); border-radius: 10px; padding: 12px; border: 1px solid var(--border-color); }
         
-        select, input[type="file"] { width: 100%; background: #080c10; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 12px; outline: none; }
+        select, input[type="file"], input[type="text"] { width: 100%; background: #080c10; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; font-size: 12px; outline: none; }
+        input[type="text"] { margin-bottom: 10px; cursor: text !important; }
         
         .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 8px; font-size: 13px; font-weight: 700; }
         .switch { position: relative; width: 38px; height: 20px; }
@@ -101,8 +102,18 @@
         .btn-export { background: #00d4ff; color: #000; }
         .btn-import { background: #f1c40f; color: #000; }
 
-        .pixel-marker { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .pixel-marker div { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; }
+        /* Markerlar ve Etiketler */
+        .pixel-marker { border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: visible !important; }
+        .pixel-marker div { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; position: relative; }
+        
+        .marker-label {
+            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85); color: #fff; padding: 4px 10px; border-radius: 6px;
+            font-size: 11px; font-weight: 800; white-space: nowrap; pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.2); font-family: var(--font-tech);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1000;
+        }
+
         .fill-red { border: 3px solid var(--danger-color); background: rgba(255, 68, 68, 0.35) !important; }
         .fill-green { border: 3px solid var(--primary-color); background: rgba(0, 255, 0, 0.35) !important; }
         .hollow-black { border: 3px solid #000; background: transparent !important; }
@@ -129,15 +140,10 @@
 
     <div id="guide-panel">
         <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">BAK BURASI ÖNEMLİ</div>
-        <div class="guide-item"><span class="guide-key">ÖNEMLİ</span> Haritaya eklediğin her işaretçi ve yüklediğin harita görseli, tarayıcının IndexedDB adlı yerel veritabanına kaydedilir. Bu veritabanı sadece senin bilgisayarındaki o tarayıcıya özeldir.</div>
+        <div class="guide-item"><span class="guide-key">ÖNEMLİ</span> Haritaya eklediğin her işaretçi ve yüklediğin harita görseli, tarayıcının IndexedDB adlı yerel veritabanına kaydedilir.</div>
+        <div class="guide-item"><span class="guide-key">TEXT</span> İşaretçi koymadan önce kutuya metin yazarsan, işaretin üzerinde etiketi görünür.</div>
         <div class="guide-item"><span class="guide-key">SOL TIK</span> BASTIGIN YERE İŞARET KOYAR</div>
         <div class="guide-item"><span class="guide-key">SAĞ TIK</span> EKLEDİGİN ŞEYİ SİLERSİN AŞK</div>
-        <div class="guide-item"><span class="guide-key">SÜRÜKLE</span> İŞARETE BASIP HARİTADA GEZDİREBİLİRSİN</div>
-        <div class="guide-item"><span class="guide-key">BOŞ SİYAH</span> BURDA BİŞEYLER DÖNECEK HADİ BAKALIM</div>
-        <div class="guide-item"><span class="guide-key">YEŞİL</span> BURDA SANIRIM ONEMLİ Bİ YER VAR</div>
-        <div class="guide-item"><span class="guide-key">KIRMIZI</span> BURDA BİŞEY YOK AQ</div>
-        <div class="guide-item"><span class="guide-key">DİKKAT</span> HARİTADA GEZERKEN EKLEMEYİ KAPA HARİTA MAYIN TARLASI OLMASIN</div>
-        <div class="guide-item"><span class="guide-key">KOD PAYLAŞIM</span> ÖZEL GORSELLER HARİÇ DİĞERLERİNİ DIŞA AKTARIR</div>
         <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">OKEYDİR CANIM</button>
     </div>
 
@@ -150,8 +156,9 @@
         </div>
 
         <div class="section">
-            <span class="section-title">İŞARETÇİ STİLİ</span>
+            <span class="section-title">İŞARETÇİ VE METİN</span>
             <div class="input-group">
+                <input type="text" id="markerTextInput" placeholder="Etiket yaz (Örn: Çete Evi)">
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
                     <option value="green">🟢 BURDA BİŞEY VAR</option>
@@ -226,14 +233,12 @@
     function refreshMap() { if(globalApp) globalApp.render(); }
     function confirmClear() { if(confirm("Bütün emeğimizi siliyoruz?")) globalApp.clearMarkers(); }
 
-    // DIŞARI AKTAR
     function exportToCode() {
         if(!globalApp) return;
         const code = JSON.stringify(globalApp.getData());
         navigator.clipboard.writeText(code).then(() => alert("İşaret kodları panoya kopyalandı!"));
     }
 
-    // İÇERİ AKTAR
     function importFromCode() {
         if(!globalApp) return;
         const code = prompt("Kopyaladığın kod dizisini buraya yapıştır:");
@@ -297,10 +302,12 @@
                 id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
                 type: document.getElementById('typeSelect').value,
+                text: document.getElementById('markerTextInput').value,
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null
             };
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
             savedMarkers.push(markerData);
+            document.getElementById('markerTextInput').value = ""; // Temizle
             render();
         });
 
@@ -309,12 +316,13 @@
             const isEditable = document.getElementById('editMode').checked;
             savedMarkers.forEach(d => {
                 let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
-                const style = d.img ? `background-image:url(${d.img});` : '';
                 const icon = L.divIcon({ 
                     className: `pixel-marker ${mClass}`, 
                     iconSize: [d.size, d.size], 
                     iconAnchor: [d.size/2, d.size/2],
-                    html: `<div style="${style}"></div>`
+                    html: `<div style="${d.img ? 'background-image:url('+d.img+')' : ''}">
+                        ${d.text ? `<div class="marker-label">${d.text}</div>` : ''}
+                    </div>`
                 });
                 const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
                 if(isEditable) {
