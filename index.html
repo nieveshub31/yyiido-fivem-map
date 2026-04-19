@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System</title>
+    <title>v</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
@@ -29,7 +29,7 @@
         #main-content { display: none; }
         #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
-        /* KNGLRP Butonu ve Parıltı Efekti */
+        /* KNGLRP Butonu */
         #main-logo {
             position: fixed;
             top: 20px;
@@ -44,7 +44,6 @@
             border-radius: 8px;
             border: 1px solid var(--primary-color);
             cursor: pointer;
-            text-shadow: 0 0 5px #fff, 0 0 10px var(--glow-color);
             animation: kngl-glow 2s infinite alternate;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: 0.3s;
@@ -63,28 +62,17 @@
             background: var(--panel-bg); padding: 25px; border-radius: 16px;
             border: 1px solid var(--border-color); width: 280px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
-            max-height: 75vh; 
-            overflow-x: hidden;
-            overflow-y: auto;
+            max-height: 75vh; overflow-x: hidden; overflow-y: auto;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 1;
-            transform: translateY(0);
+            opacity: 1; transform: translateY(0);
         }
-        
-        /* Panel Kapalı Durumu */
-        #controls.collapsed { 
-            transform: translateY(-20px) translateX(-350px);
-            opacity: 0;
-            pointer-events: none;
-        }
+        #controls.collapsed { transform: translateY(-20px) translateX(-350px); opacity: 0; pointer-events: none; }
 
         .panel-header { font-size: 14px; font-weight: 800; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-transform: uppercase; }
         .section { margin-bottom: 20px; }
         .section-title { font-size: 10px; font-weight: 900; color: #666; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; display: block; }
         .input-group { background: var(--input-bg); border-radius: 10px; padding: 12px; border: 1px solid #2a3441; margin-bottom: 10px; }
-        
         input[type="file"], select { width: 100%; cursor: pointer; background: #2a3441; color: white; border: none; border-radius: 6px; padding: 8px; box-sizing: border-box; outline: none; }
-        
         .switch-group { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 15px; border-radius: 10px; border: 1px solid #2a3441; }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -92,7 +80,6 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary-color); }
         input:checked + .slider:before { transform: translateX(22px); }
-
         input[type="range"] { width: 100%; accent-color: var(--primary-color); margin-top: 10px; }
         .btn-action { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; font-size: 11px; }
         .btn-logout { background: #2a1212; color: #ff5555; border: 1px solid #441a1a; }
@@ -105,7 +92,7 @@
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>SİSTEME GİRİŞ</h2>
+        <h2>yyiido-nieves - Map System</h2>
         <input type="password" id="passInput" placeholder="Erişim Şifresi">
         <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; cursor:pointer; font-size:14px; color:#888;">
             <input type="checkbox" id="rememberCheck"> Beni Hatırla
@@ -117,7 +104,6 @@
 
 <div id="main-content">
     <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
-
     <div id="controls">
         <div class="panel-header">KONTROL PANELİ</div>
         <div class="section">
@@ -129,8 +115,8 @@
             <div class="input-group">
                 <input type="file" id="markerImgInput" accept="image/*" style="margin-bottom:12px">
                 <select id="typeSelect">
-                    <option value="red">🔴 Kırmızı Nokta</option>
-                    <option value="green">🟢 Yeşil Nokta</option>
+                    <option value="red">🔴 Kırmızı Kare</option>
+                    <option value="green">🟢 Yeşil Kare</option>
                     <option value="custom_img">🖼️ Özel İkon</option>
                 </select>
                 <input type="range" id="sizeSlider" min="10" max="150" value="40">
@@ -160,10 +146,7 @@
         } else { document.getElementById('error-msg').style.display = 'block'; }
     }
 
-    // Logo tıklandığında paneli açıp kapatır
-    function togglePanel() {
-        document.getElementById('controls').classList.toggle('collapsed');
-    }
+    function togglePanel() { document.getElementById('controls').classList.toggle('collapsed'); }
 
     function showMainContent() {
         document.getElementById('login-overlay').style.display = 'none';
@@ -171,16 +154,15 @@
         initApp();
     }
 
-    window.onload = () => {
-        if (localStorage.getItem('map_session')==='active' || sessionStorage.getItem('map_session')==='active') showMainContent();
-    };
+    window.onload = () => { if (localStorage.getItem('map_session')==='active' || sessionStorage.getItem('map_session')==='active') showMainContent(); };
 
     function logout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
 
     function initApp() {
         const dbName = "MapStore_v6";
         let db, savedMarkers = [], customIcon = null;
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3 });
+        // zoomControl: false ile butonları kaldırdık
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
 
         const request = indexedDB.open(dbName, 1);
