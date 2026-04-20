@@ -61,41 +61,6 @@
         #main-content { display: none; }
         #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
-        /* GTA 5 STİLİ MERKEZ NİŞANGAH (CROSSHAIR) */
-        #gta-crosshair {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 30px;
-            height: 30px;
-            pointer-events: none; /* Tıklamaların alttaki haritaya geçmesine izin ver */
-            z-index: 1000;
-        }
-        #gta-crosshair::before, #gta-crosshair::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
-        }
-        #gta-crosshair::before {
-            top: 50%; left: -5px; right: -5px; height: 2px; transform: translateY(-50%);
-        }
-        #gta-crosshair::after {
-            left: 50%; top: -5px; bottom: -5px; width: 2px; transform: translateX(-50%);
-        }
-
-        .top-controls { position: fixed; top: 20px; left: 20px; z-index: 1001; display: flex; gap: 12px; }
-        #main-logo, #help-btn {
-            font-weight: 900; font-size: 13px; color: #fff; background: var(--panel-bg); 
-            padding: 12px 22px; border-radius: 12px; border: 1px solid var(--border-color); 
-            transition: 0.3s; cursor: pointer !important; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px); font-family: var(--font-tech); letter-spacing: 1px;
-        }
-        #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
-        #help-btn { color: var(--info-color); border-color: rgba(162, 119, 255, 0.3); }
-
         /* --- MODERN AÇILIR LİSTE (SÜRÜKLE BIRAKLI) --- */
         #gta-checklist {
             position: fixed; top: 20px; right: 20px; z-index: 1001;
