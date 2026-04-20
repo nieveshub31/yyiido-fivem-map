@@ -60,7 +60,46 @@
         #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
         #help-btn { color: var(--info-color); border-color: rgba(0, 212, 255, 0.3); }
 
-        /* REHBER PANELİ */
+        /* GTA STYLE CHECKLIST SIDEBAR */
+        #gta-checklist {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 220px;
+        }
+        .gta-list-item {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 15px;
+            font-family: var(--font-tech);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            border-right: 4px solid transparent;
+            cursor: pointer !important;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .gta-list-item:hover {
+            background: #fff;
+            color: #000;
+            border-right: 4px solid var(--primary-color);
+            transform: translateX(-5px);
+        }
+        .gta-list-item .item-type {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
         #guide-panel {
             position: fixed; top: 75px; left: 15px; z-index: 2000;
             background: var(--panel-bg); padding: 25px; border-radius: 15px;
@@ -102,7 +141,6 @@
         .btn-export { background: #00d4ff; color: #000; }
         .btn-import { background: #f1c40f; color: #000; }
 
-        /* MARKER VE ETİKET */
         .pixel-marker { display: flex; align-items: center; justify-content: center; overflow: visible !important; }
         .icon-box { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; position: relative; display: flex; align-items: center; justify-content: center; }
         
@@ -147,13 +185,14 @@
         <div id="help-btn" onclick="toggleGuide()">?</div>
     </div>
 
+    <div id="gta-checklist"></div>
+
     <div id="guide-panel">
         <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">KULLANIM KILAVUZU</div>
-        <div class="guide-item"><span class="guide-key">VERİ</span> Tüm işaretçiler ve harita tarayıcı hafızasına (IndexedDB) otomatik kaydedilir.</div>
-        <div class="guide-item"><span class="guide-key">METİN</span> İşaret koymadan önce "Etiket Yaz" kısmını doldurursan işaretçinin üzerinde görünür.</div>
+        <div class="guide-item"><span class="guide-key">VERİ</span> Tüm işaretçiler ve harita hafızaya otomatik kaydedilir.</div>
+        <div class="guide-item"><span class="guide-key">GTA LİSTESİ</span> Sağ taraftaki isimlere tıklarsan harita oraya süzülür.</div>
         <div class="guide-item"><span class="guide-key">SOL TIK</span> Seçili stilde işaretçi ekler.</div>
         <div class="guide-item"><span class="guide-key">SAĞ TIK</span> İşaretçiyi kalıcı olarak siler (Düzenleme açıkken).</div>
-        <div class="guide-item"><span class="guide-key">DRAG</span> İşaretçileri harita üzerinde sürükleyip yerini değiştirebilirsin.</div>
         <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">ANLAŞILDI</button>
     </div>
 
@@ -299,7 +338,7 @@
                 id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
                 type: document.getElementById('typeSelect').value,
-                text: document.getElementById('markerTextInput').value.trim(),
+                text: document.getElementById('markerTextInput').value.trim() || "ISARET " + (savedMarkers.length + 1),
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null
             };
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
@@ -310,8 +349,25 @@
 
         function render() {
             markerLayer.clearLayers();
+            const checklistContainer = document.getElementById('gta-checklist');
+            checklistContainer.innerHTML = ''; // Listeyi temizle
+
             const isEditable = document.getElementById('editMode').checked;
+            
             savedMarkers.forEach(d => {
+                // GTA LISTESI EKLEME
+                const listItem = document.createElement('div');
+                listItem.className = 'gta-list-item';
+                let dotColor = d.type === 'red' ? 'var(--danger-color)' : (d.type === 'green' ? 'var(--primary-color)' : '#fff');
+                listItem.innerHTML = `<span>${d.text}</span> <div class="item-type" style="background:${dotColor}"></div>`;
+                
+                // TIKLAYINCA ORAYA GITME
+                listItem.onclick = () => {
+                    map.flyTo([d.lat, d.lng], 1, { animate: true, duration: 1.5 });
+                };
+                checklistContainer.appendChild(listItem);
+
+                // HARITA MARKERLARI
                 let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
                 const icon = L.divIcon({ 
                     className: `pixel-marker`, 
