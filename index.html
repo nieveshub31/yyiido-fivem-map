@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yyiido nieves - Map System v1.0</title>
+    <title>yyiido nieves - Map System v1.3 LUX</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #00e5ff;
-            --danger-color: #ff3366;
-            --info-color: #a277ff;
+            /* LUX THEME COLORS */
+            --primary-color: #00e5ff; /* Premium Cyan */
+            --danger-color: #ff3366; 
+            --info-color: #a277ff; 
             --bg-dark: #050505;
-            --panel-bg: rgba(10, 12, 16, 0.85);
+            --panel-bg: rgba(10, 12, 16, 0.75); /* Cam efekti için daha saydam */
             --border-color: rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(0, 0, 0, 0.4);
+            --border-highlight: rgba(255, 255, 255, 0.2);
+            --input-bg: rgba(0, 0, 0, 0.5);
             --text-main: #f0f4f8;
             --text-muted: #718096;
             --font-main: 'Inter', sans-serif;
@@ -23,171 +25,302 @@
         
         body, html, #map, .leaflet-container, * { cursor: crosshair !important; }
         body { margin: 0; padding: 0; background: var(--bg-dark); font-family: var(--font-main); color: var(--text-main); overflow: hidden; }
-        * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
 
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
 
         #login-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #0a1118 0%, #030405 100%); 
+            background: radial-gradient(circle at center, #0a0e14 0%, #030405 100%); 
             z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
         .login-box { 
-            background: var(--panel-bg); padding: 40px; border-radius: 30px; 
-            border: 1px solid var(--border-color); text-align: center; width: 380px; 
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8); backdrop-filter: blur(50px);
+            background: var(--panel-bg); padding: 50px 40px; border-radius: 24px; 
+            border: 1px solid var(--border-color); text-align: center; width: 400px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.05); 
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
         }
-        .login-box h2 { letter-spacing: 4px; font-size: 16px; font-family: var(--font-tech); margin-bottom: 25px; }
-        .login-box input { 
-            padding: 15px; width: 100%; border-radius: 15px; border: 1px solid var(--border-color); 
-            background: var(--input-bg); color: white; margin-bottom: 20px; outline: none; text-align: center;
+        .login-box h2 { color: #fff; letter-spacing: 4px; margin-bottom: 30px; font-size: 18px; font-weight: 800; font-family: var(--font-tech); text-shadow: 0 0 20px rgba(0, 229, 255, 0.3); }
+        .login-box input[type="password"] { 
+            padding: 16px; width: 100%; border-radius: 12px; border: 1px solid var(--border-highlight); 
+            background: var(--input-bg); color: white; margin-bottom: 20px; outline: none; 
+            text-align: center; font-family: var(--font-tech); font-size: 15px; cursor: text !important;
+            transition: 0.3s;
         }
+        .login-box input[type="password"]:focus { border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
         .login-box button { 
-            width: 100%; padding: 15px; background: var(--primary-color); border: none; 
-            font-weight: 800; border-radius: 15px; color: #000; cursor: pointer !important;
+            width: 100%; padding: 16px; background: transparent; border: 1px solid var(--primary-color); 
+            font-weight: 800; border-radius: 12px; color: var(--primary-color); transition: 0.3s; 
+            text-transform: uppercase; font-family: var(--font-tech); letter-spacing: 2px;
         }
+        .login-box button:hover { background: var(--primary-color); color: #000; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
 
         #main-content { display: none; }
-        #map { height: 100vh; width: 100vw; z-index: 1; }
+        #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
 
-        /* --- LUX SOL PANEL --- */
-        #controls {
-            position: fixed; top: 80px; left: 20px; z-index: 1000;
-            background: var(--panel-bg); padding: 25px; border-radius: 24px;
-            border: 1px solid var(--border-color); width: 280px;
-            backdrop-filter: blur(40px); box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        /* GTA 5 STİLİ MERKEZ NİŞANGAH (CROSSHAIR) */
+        #gta-crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            pointer-events: none; /* Tıklamaların alttaki haritaya geçmesine izin ver */
+            z-index: 1000;
         }
-        #controls.collapsed { transform: translateX(-350px); opacity: 0; }
-
-        .panel-header { font-family: var(--font-tech); font-size: 10px; letter-spacing: 3px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; text-transform: uppercase; }
-        .section-title { font-family: var(--font-tech); font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
-        
-        input[type="text"], select, input[type="file"] {
-            width: 100%; background: var(--input-bg); color: #fff; border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; outline: none;
+        #gta-crosshair::before, #gta-crosshair::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
         }
-        input[type="text"]:focus { border-color: var(--primary-color); }
+        #gta-crosshair::before {
+            top: 50%; left: -5px; right: -5px; height: 2px; transform: translateY(-50%);
+        }
+        #gta-crosshair::after {
+            left: 50%; top: -5px; bottom: -5px; width: 2px; transform: translateX(-50%);
+        }
 
-        .switch-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px; font-family: var(--font-tech); }
-        .switch { position: relative; width: 34px; height: 18px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer !important; top: 0; left: 0; right: 0; bottom: 0; background: #222; border-radius: 20px; transition: .3s; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background: #555; border-radius: 50%; transition: .3s; }
-        input:checked + .slider { background: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(16px); background: #000; }
+        .top-controls { position: fixed; top: 20px; left: 20px; z-index: 1001; display: flex; gap: 12px; }
+        #main-logo, #help-btn {
+            font-weight: 900; font-size: 13px; color: #fff; background: var(--panel-bg); 
+            padding: 12px 22px; border-radius: 12px; border: 1px solid var(--border-color); 
+            transition: 0.3s; cursor: pointer !important; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px); font-family: var(--font-tech); letter-spacing: 1px;
+        }
+        #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        #help-btn { color: var(--info-color); border-color: rgba(162, 119, 255, 0.3); }
 
-        .btn-action { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); color: #fff; font-size: 10px; font-weight: 700; font-family: var(--font-tech); cursor: pointer !important; margin-bottom: 8px; transition: 0.3s; }
-        .btn-action:hover { background: rgba(255,255,255,0.08); border-color: var(--primary-color); }
-
-        /* --- SAĞ PANEL (FIXED LIST) --- */
+        /* --- MODERN AÇILIR LİSTE (SÜRÜKLE BIRAKLI) --- */
         #gta-checklist {
             position: fixed; top: 20px; right: 20px; z-index: 1001;
-            display: flex; flex-direction: column; width: 320px;
-            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); transform: translateX(120%);
+            display: flex; flex-direction: column; gap: 5px; max-height: 90vh; width: 340px;
+            transition: 0.5s cubic-bezier(0.25, 1, 0.5, 1); transform: translateX(110%);
         }
         #gta-checklist.active { transform: translateX(0); }
-
-        .checklist-inner {
-            background: var(--panel-bg); border: 1px solid var(--border-color);
-            border-radius: 24px; padding: 20px; max-height: 85vh; overflow-y: auto;
-            backdrop-filter: blur(40px); box-shadow: 0 30px 70px rgba(0,0,0,0.7);
-            margin-top: 60px;
-        }
-        
-        .gta-list-item {
-            background: rgba(255,255,255,0.03); padding: 14px; margin-bottom: 10px;
-            border-radius: 16px; border: 1px solid var(--border-color);
-            cursor: grab !important; transition: 0.2s; display: flex; align-items: center; gap: 12px;
-        }
-        .gta-list-item:active { cursor: grabbing !important; }
-        .gta-list-item.dragging { opacity: 0.2; transform: scale(0.95); }
-        
-        .item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
-        .item-name { font-size: 12px; font-weight: 700; color: #fff; text-transform: uppercase; }
-        .item-meta { font-size: 9px; color: var(--text-muted); font-family: var(--font-tech); }
-        .item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 10px currentColor; }
 
         #checklist-toggle {
             position: fixed; top: 20px; right: 20px; z-index: 1002;
             background: var(--panel-bg); color: var(--primary-color);
-            border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 15px;
-            font-family: var(--font-tech); font-weight: 800; cursor: pointer !important;
+            border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 12px;
+            font-family: var(--font-tech); font-weight: 900; font-size: 13px;
+            cursor: pointer !important; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             backdrop-filter: blur(20px); transition: 0.3s;
         }
-        #checklist-toggle.active { background: var(--primary-color); color: #000; }
+        #checklist-toggle:hover { border-color: var(--primary-color); }
+        #checklist-toggle.active { background: var(--primary-color); color: #000; box-shadow: 0 0 20px rgba(0,229,255,0.3); }
 
-        #main-logo {
-            position: fixed; top: 20px; left: 20px; z-index: 1001;
-            background: var(--panel-bg); color: #fff; padding: 12px 20px; border-radius: 15px;
-            font-weight: 900; font-family: var(--font-tech); border: 1px solid var(--border-color);
-            cursor: pointer !important;
+        .checklist-inner {
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; overflow-y: auto;
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            margin-top: 60px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.03);
+        }
+        .checklist-header {
+            font-family: var(--font-tech); font-size: 11px; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* MARKER STYLES */
+        .gta-list-item {
+            background: var(--input-bg); padding: 12px 16px; margin-bottom: 8px;
+            border-radius: 10px; font-family: var(--font-tech); text-transform: uppercase;
+            border: 1px solid var(--border-color); border-left: 3px solid var(--primary-color);
+            cursor: grab !important; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .gta-list-item:active { cursor: grabbing !important; }
+        .gta-list-item:hover { border-color: var(--primary-color); background: rgba(255,255,255,0.05); }
+        .gta-list-item.dragging { opacity: 0.4; border-style: dashed; transform: scale(0.98); }
+        
+        /* Listeden seçildiğinde aktif olduğunu belirten sınıf */
+        .gta-list-item.active-item {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px);
+        }
+        
+        .drag-icon {
+            color: var(--text-muted); font-size: 14px; opacity: 0.5;
+            display: flex; align-items: center; justify-content: center; width: 20px;
+        }
+        .item-content-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; cursor: pointer !important; }
+        .item-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+        .item-title { font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .item-coords { font-size: 9px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; }
+
+        /* --- LUX SOL KONTROL PANELİ --- */
+        #controls {
+            position: fixed; top: 85px; left: 20px; z-index: 1000;
+            background: var(--panel-bg); padding: 25px; border-radius: 16px;
+            border: 1px solid var(--border-color); width: 300px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.03); 
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            max-height: 85vh; overflow-y: auto; transition: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        #controls.collapsed { transform: translateX(-350px); opacity: 0; pointer-events: none; }
+
+        .panel-header { font-family: var(--font-tech); font-size: 11px; font-weight: 800; color: #fff; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; text-transform: uppercase; letter-spacing: 2px; }
+        .section { margin-bottom: 24px; }
+        .section-title { font-family: var(--font-tech); font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 1px; }
+        
+        select, input[type="file"], input[type="text"] { 
+            width: 100%; background: var(--input-bg); color: var(--text-main); 
+            border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; 
+            font-size: 12px; outline: none; transition: 0.3s; margin-bottom: 10px;
+            font-family: var(--font-tech);
+        }
+        input[type="text"]:focus, select:focus { border-color: var(--primary-color); background: rgba(0,0,0,0.8); }
+        
+        input[type="range"] {
+            -webkit-appearance: none; width: 100%; background: transparent; margin-top: 5px;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: var(--border-highlight); border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            height: 14px; width: 14px; border-radius: 50%; background: var(--primary-color);
+            cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .switch-group { display: flex; align-items: center; justify-content: space-between; padding: 10px 4px; margin-bottom: 4px; font-size: 12px; font-weight: 500; font-family: var(--font-tech); color: #ccc;}
+        .switch { position: relative; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer !important; top: 0; left: 0; right: 0; bottom: 0; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background: var(--text-muted); border-radius: 50%; transition: .3s; }
+        input:checked + .slider { background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
+        input:checked + .slider:before { transform: translateX(16px); background: #000; }
+
+        .btn-action { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: #fff; font-weight: 700; font-size: 10px; text-transform: uppercase; font-family: var(--font-tech); transition: 0.3s; cursor: pointer !important; margin-bottom: 8px; letter-spacing: 1px; }
+        .btn-action:hover { background: rgba(255,255,255,0.05); border-color: var(--border-highlight); }
+        .btn-clear { color: var(--danger-color); border-color: rgba(255, 51, 102, 0.3); }
+        .btn-clear:hover { background: rgba(255, 51, 102, 0.1); border-color: var(--danger-color); }
+        .btn-logout { margin-top: 15px; color: var(--text-muted); }
+
+        /* --- MARKER VE ETİKET --- */
+        .pixel-marker { display: flex; align-items: center; justify-content: center; overflow: visible !important; }
+        .icon-box { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.8); transition: transform 0.3s; }
+        
         .marker-label {
-            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.85); color: #fff; padding: 5px 12px; border-radius: 8px;
-            font-size: 10px; font-weight: 800; font-family: var(--font-tech); border: 1px solid rgba(255,255,255,0.1);
-            white-space: nowrap; pointer-events: none; backdrop-filter: blur(5px);
+            position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+            background: rgba(5, 5, 5, 0.9); color: #fff; padding: 6px 12px; border-radius: 6px;
+            font-size: 10px; font-weight: 700; font-family: var(--font-tech); white-space: nowrap;
+            pointer-events: none; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.7); backdrop-filter: blur(10px); letter-spacing: 1px;
+            transition: 0.3s;
         }
-        .icon-box { width: 100%; height: 100%; border-radius: 50%; background-size: cover; border: 2px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-        .fill-red { border-color: var(--danger-color); background-color: rgba(255, 51, 102, 0.3); }
-        .fill-green { border-color: var(--primary-color); background-color: rgba(0, 229, 255, 0.3); }
+
+        .fill-red { border: 2px solid var(--danger-color); background: rgba(255, 51, 102, 0.4) !important; box-shadow: 0 0 15px rgba(255,51,102,0.4); }
+        .fill-green { border: 2px solid var(--primary-color); background: rgba(0, 229, 255, 0.3) !important; box-shadow: 0 0 15px rgba(0,229,255,0.4); }
+        .hollow-black { border: 2px solid #fff; background: rgba(0,0,0,0.6) !important; }
+
+        /* GTA 5 Radar (Ping) Animasyonu */
+        @keyframes gta-ping {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8); }
+            70% { box-shadow: 0 0 0 30px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+        .gta-ping-active {
+            animation: gta-ping 1.5s infinite;
+            border-color: #fff !important;
+            transform: scale(1.2); /* Biraz daha büyük görünür */
+            z-index: 999 !important;
+        }
+        .gta-ping-active .marker-label {
+            transform: translateX(-50%) scale(1.1);
+            background: #fff;
+            color: #000;
+        }
+
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="login-overlay">
     <div class="login-box">
-        <h2>YYIIDO X KNGLRP X NİEVES</h2>
-        <input type="password" id="passInput" placeholder="••••••••">
-        <button onclick="checkLogin()">SİSTEME GİR</button>
+        <h2>YYIIDO NIEVES MAPS</h2>
+        <input type="password" id="passInput" placeholder="SİSTEM ŞİFRESİ">
+        <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
 </div>
 
 <div id="main-content">
-    <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
-    <button id="checklist-toggle" onclick="toggleChecklist()">LISTE</button>
+    
+    <!-- Merkezi Nişangah (Crosshair) -->
+    <div id="gta-crosshair"></div>
+
+    <div class="top-controls">
+        <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
+    </div>
+
+    <button id="checklist-toggle" onclick="toggleChecklist()">[ &gt; ]</button>
 
     <div id="gta-checklist">
-        <div class="checklist-inner" id="checklist-items"></div>
+        <div class="checklist-inner">
+            <div class="checklist-header">
+                <span>LOKASYON VERİTABANI</span>
+                <span style="font-size: 9px; opacity: 0.5;">(SÜRÜKLE & BIRAK)</span>
+            </div>
+            <div id="checklist-items"></div>
+        </div>
     </div>
 
     <div id="controls">
-        <div class="panel-header">YYİİDO NİEVES</div>
+        <div class="panel-header">KONTROL PANELİ</div>
         
-        <div style="margin-bottom: 20px;">
-            <span class="section-title">HARİTA</span>
+        <div class="section">
+            <span class="section-title">HARİTA YÜKLE</span>
             <input type="file" id="mainMapInput" accept="image/*">
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <span class="section-title">İŞARETÇİ AYARI</span>
-            <input type="text" id="markerTextInput" placeholder="Etiket İsmi...">
+        <div class="section">
+            <span class="section-title">İŞARETÇİ OLUŞTURUCU</span>
+            <input type="text" id="markerTextInput" placeholder="Etiket (Boş bırakılabilir)">
             <select id="typeSelect">
-                <option value="green">GÜVENLİ (MAVİ)</option>
-                <option value="red">TEHLİKE (KIRMIZI)</option>
-                <option value="black">STANDART (BEYAZ)</option>
-                <option value="custom_img">ÖZEL RESİM</option>
+                <option value="green">🟢 GÜVENLİ LOKASYON</option>
+                <option value="red">🔴 RİSKLİ BÖLGE</option>
+                <option value="black">⚫ STANDART NOKTA</option>
+                <option value="custom_img">🖼️ ÖZEL İKON</option>
             </select>
-            <input type="file" id="markerImgInput" accept="image/*">
-            <span class="section-title">BOYUT: <span id="sizeVal">40</span>px</span>
-            <input type="range" id="sizeSlider" min="15" max="120" value="40" style="width:100%" oninput="document.getElementById('sizeVal').innerText=this.value">
+            <input type="file" id="markerImgInput" accept="image/*" style="margin-top:5px; margin-bottom: 5px;">
+            <div style="display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); font-family: var(--font-tech); margin-top: 10px;">
+                <span>BOYUT</span>
+                <span id="sizeValue">40px</span>
+            </div>
+            <input type="range" id="sizeSlider" min="15" max="150" value="40" oninput="document.getElementById('sizeValue').innerText = this.value + 'px'">
         </div>
 
-        <div>
-            <span class="section-title">MODLAR</span>
-            <div class="switch-group"><span>DÜZENLEME</span><label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label></div>
-            <div class="switch-group"><span>EKLEME</span><label class="switch"><input type="checkbox" id="addMode" checked><span class="slider"></span></label></div>
+        <div class="section">
+            <span class="section-title">VERİ AKTARIMI</span>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-action" onclick="exportToCode()">KOPYALA</button>
+                <button class="btn-action" onclick="importFromCode()">YÜKLE</button>
+            </div>
         </div>
 
-        <div style="margin-top:20px;">
-            <button class="btn-action" onclick="exportToCode()">VERİYİ KOPYALA</button>
-            <button class="btn-action" onclick="importFromCode()">VERİ YÜKLE</button>
-            <button class="btn-action" style="color:var(--danger-color)" onclick="confirmClear()">SIFIRLA</button>
-            <button class="btn-action" style="opacity:0.5; margin-top:10px;" onclick="logout()">ÇIKIŞ YAP</button>
+        <div class="section">
+            <span class="section-title">SİSTEM DURUMU</span>
+            <div class="switch-group">
+                <span>DÜZENLEME MODU</span>
+                <label class="switch"><input type="checkbox" id="editMode" checked onchange="refreshMap()"><span class="slider"></span></label>
+            </div>
+            <div class="switch-group">
+                <span>YENİ NOKTA EKLE</span>
+                <label class="switch"><input type="checkbox" id="addMode" checked><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div class="section" style="margin-bottom: 0;">
+            <button class="btn-action btn-clear" onclick="confirmClear()">TÜMÜNÜ SİL</button>
+            <button class="btn-action btn-logout" onclick="logout()">GÜVENLİ ÇIKIŞ</button>
         </div>
     </div>
     
@@ -197,7 +330,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     const _p = "knglrpsikersakatbırakır";
-    let db, savedMarkers = [], globalApp = null, customIcon = null;
 
     function checkLogin() {
         if (document.getElementById('passInput').value === _p) {
@@ -212,27 +344,41 @@
         initApp();
     }
 
+    function toggleChecklist() {
+        document.getElementById('gta-checklist').classList.toggle('active');
+        const btn = document.getElementById('checklist-toggle');
+        btn.classList.toggle('active');
+        btn.innerText = btn.classList.contains('active') ? '[ < ]' : '[ > ]';
+    }
     window.onload = () => { if (sessionStorage.getItem('map_auth') === 'true') showMainContent(); };
     function logout() { sessionStorage.clear(); location.reload(); }
     function togglePanel() { document.getElementById('controls').classList.toggle('collapsed'); }
-    function toggleChecklist() {
-        document.getElementById('gta-checklist').classList.toggle('active');
-        document.getElementById('checklist-toggle').classList.toggle('active');
+
+    let globalApp = null;
+    function refreshMap() { if(globalApp) globalApp.render(); }
+    function confirmClear() { if(confirm("Veritabanı sıfırlanacak. Onaylıyor musun?")) globalApp.clearMarkers(); }
+
+    function exportToCode() {
+        if(!globalApp) return;
+        const code = JSON.stringify(globalApp.getData());
+        navigator.clipboard.writeText(code).then(() => alert("Sistem verisi panoya kopyalandı."));
     }
 
-    function refreshMap() { if(globalApp) globalApp.render(); }
-    function confirmClear() { if(confirm("Tüm noktalar silinecek?")) globalApp.clearMarkers(); }
-    function exportToCode() { navigator.clipboard.writeText(JSON.stringify(savedMarkers)).then(() => alert("Kopyalandı!")); }
     function importFromCode() {
-        const code = prompt("Kodu yapıştır:");
-        if(code) { try { globalApp.importData(JSON.parse(code)); } catch(e) { alert("Hata!"); } }
+        if(!globalApp) return;
+        const code = prompt("Veri kodunu yapıştırın:");
+        if(code) {
+            try { globalApp.importData(JSON.parse(code)); } catch(e) { alert("Bozuk veri şeması."); }
+        }
     }
 
     function initApp() {
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
+        const dbName = "MapStore_v92";
+        let db, savedMarkers = [], customIcon = null;
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 4, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
 
-        const request = indexedDB.open("LuxMap_v3", 1);
+        const request = indexedDB.open(dbName, 1);
         request.onupgradeneeded = e => {
             db = e.target.result;
             db.createObjectStore("config");
@@ -242,9 +388,11 @@
         request.onsuccess = e => {
             db = e.target.result;
             db.transaction("config").objectStore("config").get("img").onsuccess = ev => { if(ev.target.result) loadMap(ev.target.result); };
+            
             db.transaction("markers").objectStore("markers").getAll().onsuccess = ev => { 
                 savedMarkers = ev.target.result || []; 
-                savedMarkers.sort((a,b) => (a.order || 0) - (b.order || 0));
+                savedMarkers.sort((a, b) => (a.order || 0) - (b.order || 0));
+                savedMarkers.forEach((m, i) => m.order = i);
                 render(); 
             };
         };
@@ -278,17 +426,22 @@
 
         map.on('click', e => {
             if (!mapLayer || !document.getElementById('addMode').checked) return;
+            
+            const userText = document.getElementById('markerTextInput').value.trim();
+            const textToSave = userText !== "" ? userText : ""; 
+
             const markerData = { 
-                id: "id_" + Date.now() + Math.random(), 
-                lat: e.latlng.lat, lng: e.latlng.lng, 
+                id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
                 type: document.getElementById('typeSelect').value,
-                text: document.getElementById('markerTextInput').value.trim(), 
+                text: textToSave, 
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null,
                 order: savedMarkers.length
             };
+            
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
             savedMarkers.push(markerData);
+            document.getElementById('markerTextInput').value = "";
             render();
         });
 
@@ -296,77 +449,126 @@
             markerLayer.clearLayers();
             const listContainer = document.getElementById('checklist-items');
             listContainer.innerHTML = ''; 
-            const isEdit = document.getElementById('editMode').checked;
 
-            savedMarkers.forEach((d) => {
-                // List Item
-                const item = document.createElement('div');
-                item.className = 'gta-list-item';
-                item.draggable = true;
-                item.dataset.id = d.id; // Sabit ID atıyoruz
+            const isEditable = document.getElementById('editMode').checked;
+            
+            savedMarkers.forEach((d, index) => {
                 
-                let color = d.type==='red'?'#ff3366':(d.type==='green'?'#00e5ff':'#fff');
-                item.innerHTML = `
-                    <div class="item-dot" style="color:${color}; background:currentColor"></div>
-                    <div class="item-info">
-                        <div class="item-name">${d.text || 'İSİMSİZ NOKTA'}</div>
-                        <div class="item-meta">X: ${d.lng.toFixed(0)} Y: ${d.lat.toFixed(0)}</div>
+                const listItem = document.createElement('div');
+                listItem.className = 'gta-list-item';
+                listItem.draggable = true; 
+                
+                let dotColor = d.type === 'red' ? 'var(--danger-color)' : (d.type === 'green' ? 'var(--primary-color)' : (d.type === 'black' ? '#fff' : 'var(--info-color)'));
+                listItem.style.borderLeftColor = dotColor;
+
+                const displayName = d.text !== "" ? d.text : `UNKNOWN DATA [${index+1}]`;
+                const coordsText = `X: ${d.lng.toFixed(1)}  |  Y: ${d.lat.toFixed(1)}`;
+
+                listItem.innerHTML = `
+                    <div class="drag-icon">⋮⋮</div>
+                    <div class="item-content-wrapper">
+                        <div class="item-row-top">
+                            <span class="item-title">${displayName}</span>
+                            <div class="item-type-dot" style="background:${dotColor}; box-shadow: 0 0 8px ${dotColor}"></div>
+                        </div>
+                        <div class="item-coords">${coordsText}</div>
                     </div>
                 `;
-                item.onclick = () => map.flyTo([d.lat, d.lng], 0);
-
-                // Drag & Drop Logic (ID tabanlı Fix)
-                item.ondragstart = e => { e.dataTransfer.setData("text/id", d.id); item.classList.add('dragging'); };
-                item.ondragend = () => item.classList.remove('dragging');
-                item.ondragover = e => e.preventDefault();
-                item.ondrop = e => {
-                    e.preventDefault();
-                    const draggedId = e.dataTransfer.getData("text/id");
-                    const targetId = d.id;
-                    if(draggedId === targetId) return;
-
-                    const draggedIdx = savedMarkers.findIndex(x => x.id === draggedId);
-                    const targetIdx = savedMarkers.findIndex(x => x.id === targetId);
-
-                    const [movedItem] = savedMarkers.splice(draggedIdx, 1);
-                    savedMarkers.splice(targetIdx, 0, movedItem);
-
-                    const tx = db.transaction("markers", "readwrite");
-                    savedMarkers.forEach((m, i) => { m.order = i; tx.objectStore("markers").put(m); });
-                    render();
-                };
-
-                listContainer.appendChild(item);
-
-                // Map Marker
+                
+                let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
                 const icon = L.divIcon({ 
                     className: `pixel-marker`, 
                     iconSize: [d.size, d.size], 
                     iconAnchor: [d.size/2, d.size/2],
-                    html: `<div class="icon-box ${d.type==='red'?'fill-red':(d.type==='green'?'fill-green':'')}" style="${d.img ? 'background-image:url('+d.img+')' : ''}">
-                        ${d.text ? `<div class="marker-label">${d.text}</div>` : ''}
-                    </div>`
+                    html: `
+                        <div class="icon-box ${mClass}" style="${d.img ? 'background-image:url('+d.img+')' : ''}">
+                            ${d.text ? `<div class="marker-label">${d.text}</div>` : ''}
+                        </div>`
                 });
-                const m = L.marker([d.lat, d.lng], { icon, draggable: isEdit }).addTo(markerLayer);
-                if(isEdit) {
+                const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
+                
+                // --- GTA 5 LİSTEDEN TIKLAMA VE PING (RADAR) EFEKTİ ---
+                listItem.querySelector('.item-content-wrapper').onclick = () => { 
+                    // 1. Önceki listelerde veya haritadaki parlamaları sıfırla
+                    document.querySelectorAll('.gta-list-item').forEach(el => el.classList.remove('active-item'));
+                    document.querySelectorAll('.icon-box').forEach(el => el.classList.remove('gta-ping-active'));
+                    
+                    // 2. Tıklanan liste elemanını parlat
+                    listItem.classList.add('active-item');
+
+                    // 3. Haritayı o noktaya (yakın bir zoom derecesiyle) kaydır
+                    map.flyTo([d.lat, d.lng], 1.5, { animate: true, duration: 1.0 }); 
+
+                    // 4. Haritadaki işaretçiye yanıp sönme animasyonu ekle
+                    if(m._icon) {
+                        let iconBox = m._icon.querySelector('.icon-box');
+                        if(iconBox) {
+                            iconBox.classList.add('gta-ping-active');
+                            // Sinyal efektini 3 saniye sonra otomatik kapat
+                            setTimeout(() => { iconBox.classList.remove('gta-ping-active'); }, 3000);
+                        }
+                    }
+                };
+
+                listItem.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', index);
+                    setTimeout(() => listItem.classList.add('dragging'), 0);
+                });
+                
+                listItem.addEventListener('dragend', () => {
+                    listItem.classList.remove('dragging');
+                });
+                
+                listItem.addEventListener('dragover', (e) => {
+                    e.preventDefault(); 
+                    e.dataTransfer.dropEffect = 'move';
+                });
+
+                listItem.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const draggedIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+                    if (draggedIdx === index || isNaN(draggedIdx)) return;
+
+                    const movedItem = savedMarkers.splice(draggedIdx, 1)[0];
+                    savedMarkers.splice(index, 0, movedItem);
+
+                    const tx = db.transaction("markers", "readwrite");
+                    savedMarkers.forEach((m, i) => {
+                        m.order = i;
+                        tx.objectStore("markers").put(m);
+                    });
+                    
+                    render(); 
+                });
+
+                listContainer.appendChild(listItem);
+
+                if(isEditable) {
                     m.on('dragend', ev => {
-                        d.lat = ev.target.getLatLng().lat; d.lng = ev.target.getLatLng().lng;
-                        db.transaction("markers", "readwrite").objectStore("markers").put(d);
-                        render();
+                        const found = savedMarkers.find(x => x.id === d.id);
+                        found.lat = ev.target.getLatLng().lat; found.lng = ev.target.getLatLng().lng;
+                        db.transaction("markers", "readwrite").objectStore("markers").put(found);
+                        render(); 
                     });
                     m.on('contextmenu', () => {
                         db.transaction("markers", "readwrite").objectStore("markers").delete(d.id);
-                        savedMarkers = savedMarkers.filter(x => x.id !== d.id);
+                        savedMarkers = savedMarkers.filter(x => x.id !== d.id); 
                         render();
                     });
                 }
             });
         }
-        globalApp = { render, clearMarkers: () => { db.transaction("markers","readwrite").objectStore("markers").clear(); savedMarkers=[]; render(); }, importData: (data) => {
-            const tx = db.transaction("markers","readwrite");
-            data.forEach(x => tx.objectStore("markers").put(x));
-            tx.oncomplete = () => location.reload();
-        }};
+        
+        globalApp = { 
+            render, getData: () => savedMarkers,
+            importData: (data) => {
+                const tx = db.transaction("markers", "readwrite");
+                data.forEach(item => tx.objectStore("markers").put(item));
+                tx.oncomplete = () => { location.reload(); };
+            },
+            clearMarkers: () => { db.transaction("markers", "readwrite").objectStore("markers").clear(); savedMarkers = []; render(); }
+        };
     }
     document.getElementById('passInput').onkeypress = e => { if(e.key==='Enter') checkLogin() };
 </script>
