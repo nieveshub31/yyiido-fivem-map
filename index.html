@@ -72,7 +72,7 @@
             max-height: 90vh;
             width: 260px;
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateX(110%); /* Varsayılan kapalı */
+            transform: translateX(110%);
         }
         #gta-checklist.active { transform: translateX(0); }
 
@@ -103,7 +103,7 @@
             padding: 15px;
             overflow-y: auto;
             backdrop-filter: blur(20px);
-            margin-top: 55px; /* Butonun altında kalması için */
+            margin-top: 55px;
         }
         .checklist-header {
             font-family: var(--font-tech);
@@ -243,10 +243,8 @@
 
     <div id="guide-panel">
         <div class="panel-header" style="color:var(--info-color); border-color:var(--info-color)">KULLANIM KILAVUZU</div>
-        <div class="guide-item"><span class="guide-key">VERİ</span> Tüm işaretçiler ve harita hafızaya otomatik kaydedilir.</div>
-        <div class="guide-item"><span class="guide-key">LİSTE</span> Sağdaki <span class="guide-key">[ > ]</span> butonuna tıkla, listedeki isimlere tıklarsan harita oraya süzülür.</div>
-        <div class="guide-item"><span class="guide-key">SOL TIK</span> Seçili stilde işaretçi ekler. Etiket yazmazsan "İŞARET XX" yazar.</div>
-        <div class="guide-item"><span class="guide-key">SAĞ TIK</span> İşaretçiyi kalıcı olarak siler (Düzenleme açıkken).</div>
+        <div class="guide-item"><span class="guide-key">VERİ</span> Tüm işaretçiler hafızaya otomatik kaydedilir.</div>
+        <div class="guide-item"><span class="guide-key">SOL TIK</span> İşaretçi ekler. Etiket yazarsan görünür, yazmazsan sadece simge çıkar.</div>
         <button class="btn-action" style="background:var(--info-color); color:#000; margin-top:10px;" onclick="toggleGuide()">ANLAŞILDI</button>
     </div>
 
@@ -317,7 +315,6 @@
         initApp();
     }
 
-    // --- PANEL KONTROLLERİ ---
     function toggleChecklist() {
         document.getElementById('gta-checklist').classList.toggle('active');
         const btn = document.getElementById('checklist-toggle');
@@ -396,16 +393,15 @@
         map.on('click', e => {
             if (!mapLayer || !document.getElementById('addMode').checked) return;
             
-            // --- ETIKET YAZISI ÇÖZÜMÜ ---
+            // Eğer kutu boşsa metni tamamen boş (null) bırakıyoruz.
             const userText = document.getElementById('markerTextInput').value.trim();
-            // Eğer kutu boşsa varsayılan isim ver, doluysa onu kullan.
-            const textToSave = userText !== "" ? userText : "ISARET " + (savedMarkers.length + 1);
+            const textToSave = userText !== "" ? userText : ""; 
 
             const markerData = { 
                 id: Date.now(), lat: e.latlng.lat, lng: e.latlng.lng, 
                 size: parseInt(document.getElementById('sizeSlider').value), 
                 type: document.getElementById('typeSelect').value,
-                text: textToSave, // Artık "İŞARETÇİ" değil, dinamik isim.
+                text: textToSave, 
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null
             };
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
@@ -417,24 +413,21 @@
         function render() {
             markerLayer.clearLayers();
             const listContainer = document.getElementById('checklist-items');
-            listContainer.innerHTML = ''; // Listeyi temizle
+            listContainer.innerHTML = ''; 
 
             const isEditable = document.getElementById('editMode').checked;
             
             savedMarkers.forEach(d => {
-                // --- MODERN LİSTE EKLEME ---
-                const listItem = document.createElement('div');
-                listItem.className = 'gta-list-item';
-                let dotColor = d.type === 'red' ? 'var(--danger-color)' : (d.type === 'green' ? 'var(--primary-color)' : (d.type === 'black' ? '#333' : 'var(--info-color)'));
-                listItem.innerHTML = `<span>${d.text}</span> <div class="item-type" style="background:${dotColor}; box-shadow: 0 0 5px ${dotColor}"></div>`;
-                
-                // TIKLAYINCA SÜZÜLEREK ORAYA GITME
-                listItem.onclick = () => {
-                    map.flyTo([d.lat, d.lng], 1, { animate: true, duration: 1.5 });
-                };
-                listContainer.appendChild(listItem);
+                // Sadece ismi olanları sağdaki listeye ekle
+                if (d.text !== "") {
+                    const listItem = document.createElement('div');
+                    listItem.className = 'gta-list-item';
+                    let dotColor = d.type === 'red' ? 'var(--danger-color)' : (d.type === 'green' ? 'var(--primary-color)' : (d.type === 'black' ? '#333' : 'var(--info-color)'));
+                    listItem.innerHTML = `<span>${d.text}</span> <div class="item-type" style="background:${dotColor}; box-shadow: 0 0 5px ${dotColor}"></div>`;
+                    listItem.onclick = () => { map.flyTo([d.lat, d.lng], 1, { animate: true, duration: 1.5 }); };
+                    listContainer.appendChild(listItem);
+                }
 
-                // --- HARITA MARKERLARI ---
                 let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
                 const icon = L.divIcon({ 
                     className: `pixel-marker`, 
@@ -446,6 +439,7 @@
                         </div>`
                 });
                 const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
+                
                 if(isEditable) {
                     m.on('dragend', ev => {
                         const found = savedMarkers.find(x => x.id === d.id);
