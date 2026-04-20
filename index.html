@@ -27,6 +27,7 @@
         body { margin: 0; padding: 0; background: var(--bg-dark); font-family: var(--font-main); color: var(--text-main); overflow: hidden; }
         * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; box-sizing: border-box; }
 
+        /* Kaydırma Çubuğu Gizleme / Stilize Etme */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -60,6 +61,17 @@
 
         #main-content { display: none; }
         #map { height: 100vh; width: 100vw; background: var(--bg-dark); z-index: 1; }
+
+        .top-controls { position: fixed; top: 20px; left: 20px; z-index: 1001; display: flex; gap: 12px; }
+        #main-logo, #help-btn {
+            font-weight: 900; font-size: 13px; color: #fff; background: var(--panel-bg); 
+            padding: 12px 22px; border-radius: 12px; border: 1px solid var(--border-color); 
+            transition: 0.3s; cursor: pointer !important; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px); font-family: var(--font-tech); letter-spacing: 1px;
+        }
+        #main-logo:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        #help-btn { color: var(--info-color); border-color: rgba(162, 119, 255, 0.3); }
 
         /* --- MODERN AÇILIR LİSTE (SÜRÜKLE BIRAKLI) --- */
         #gta-checklist {
@@ -97,26 +109,18 @@
             background: var(--input-bg); padding: 12px 16px; margin-bottom: 8px;
             border-radius: 10px; font-family: var(--font-tech); text-transform: uppercase;
             border: 1px solid var(--border-color); border-left: 3px solid var(--primary-color);
-            cursor: grab !important; transition: all 0.3s ease;
+            cursor: grab !important; transition: border-color 0.3s, transform 0.2s;
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
         .gta-list-item:active { cursor: grabbing !important; }
-        .gta-list-item:hover { border-color: var(--primary-color); background: rgba(255,255,255,0.05); }
+        .gta-list-item:hover { border-color: var(--primary-color); background: rgba(255,255,255,0.02); }
         .gta-list-item.dragging { opacity: 0.4; border-style: dashed; transform: scale(0.98); }
-        
-        /* Listeden seçildiğinde aktif olduğunu belirten sınıf */
-        .gta-list-item.active-item {
-            border-color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-            transform: translateX(-5px);
-        }
         
         .drag-icon {
             color: var(--text-muted); font-size: 14px; opacity: 0.5;
             display: flex; align-items: center; justify-content: center; width: 20px;
         }
-        .item-content-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; cursor: pointer !important; }
+        .item-content-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
         .item-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .item-title { font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .item-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -137,6 +141,7 @@
         .section { margin-bottom: 24px; }
         .section-title { font-family: var(--font-tech); font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 1px; }
         
+        /* Lux Input Stilleri */
         select, input[type="file"], input[type="text"] { 
             width: 100%; background: var(--input-bg); color: var(--text-main); 
             border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; 
@@ -156,6 +161,7 @@
             cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--primary-color);
         }
 
+        /* Modern iOS Tipi Switch */
         .switch-group { display: flex; align-items: center; justify-content: space-between; padding: 10px 4px; margin-bottom: 4px; font-size: 12px; font-weight: 500; font-family: var(--font-tech); color: #ccc;}
         .switch { position: relative; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -164,6 +170,7 @@
         input:checked + .slider { background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0,229,255,0.3); }
         input:checked + .slider:before { transform: translateX(16px); background: #000; }
 
+        /* Buton Stilleri */
         .btn-action { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: #fff; font-weight: 700; font-size: 10px; text-transform: uppercase; font-family: var(--font-tech); transition: 0.3s; cursor: pointer !important; margin-bottom: 8px; letter-spacing: 1px; }
         .btn-action:hover { background: rgba(255,255,255,0.05); border-color: var(--border-highlight); }
         .btn-clear { color: var(--danger-color); border-color: rgba(255, 51, 102, 0.3); }
@@ -172,7 +179,7 @@
 
         /* --- MARKER VE ETİKET --- */
         .pixel-marker { display: flex; align-items: center; justify-content: center; overflow: visible !important; }
-        .icon-box { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.8); transition: transform 0.3s; }
+        .icon-box { width: 100%; height: 100%; border-radius: 50%; background-size: cover !important; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
         
         .marker-label {
             position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%);
@@ -180,31 +187,11 @@
             font-size: 10px; font-weight: 700; font-family: var(--font-tech); white-space: nowrap;
             pointer-events: none; border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 5px 15px rgba(0,0,0,0.7); backdrop-filter: blur(10px); letter-spacing: 1px;
-            transition: 0.3s;
         }
 
         .fill-red { border: 2px solid var(--danger-color); background: rgba(255, 51, 102, 0.4) !important; box-shadow: 0 0 15px rgba(255,51,102,0.4); }
         .fill-green { border: 2px solid var(--primary-color); background: rgba(0, 229, 255, 0.3) !important; box-shadow: 0 0 15px rgba(0,229,255,0.4); }
         .hollow-black { border: 2px solid #fff; background: rgba(0,0,0,0.6) !important; }
-
-        /* GTA 5 Radar (Ping) Animasyonu */
-        @keyframes gta-ping {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8); }
-            70% { box-shadow: 0 0 0 30px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-        }
-        .gta-ping-active {
-            animation: gta-ping 1.5s infinite;
-            border-color: #fff !important;
-            transform: scale(1.2); /* Biraz daha büyük görünür */
-            z-index: 999 !important;
-        }
-        .gta-ping-active .marker-label {
-            transform: translateX(-50%) scale(1.1);
-            background: #fff;
-            color: #000;
-        }
-
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -218,10 +205,6 @@
 </div>
 
 <div id="main-content">
-    
-    <!-- Merkezi Nişangah (Crosshair) -->
-    <div id="gta-crosshair"></div>
-
     <div class="top-controls">
         <div id="main-logo" onclick="togglePanel()">KNGLRP</div>
     </div>
@@ -340,7 +323,7 @@
     function initApp() {
         const dbName = "MapStore_v92";
         let db, savedMarkers = [], customIcon = null;
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 4, zoomControl: false });
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -3, maxZoom: 3, zoomControl: false });
         let mapLayer = null, markerLayer = L.layerGroup().addTo(map);
 
         const request = indexedDB.open(dbName, 1);
@@ -356,7 +339,9 @@
             
             db.transaction("markers").objectStore("markers").getAll().onsuccess = ev => { 
                 savedMarkers = ev.target.result || []; 
+                // Sıralama (order) değerine göre listeyi diz
                 savedMarkers.sort((a, b) => (a.order || 0) - (b.order || 0));
+                // Eksik order varsa tamamla
                 savedMarkers.forEach((m, i) => m.order = i);
                 render(); 
             };
@@ -401,7 +386,7 @@
                 type: document.getElementById('typeSelect').value,
                 text: textToSave, 
                 img: document.getElementById('typeSelect').value === 'custom_img' ? customIcon : null,
-                order: savedMarkers.length
+                order: savedMarkers.length // En sona ekle
             };
             
             db.transaction("markers", "readwrite").objectStore("markers").add(markerData);
@@ -419,9 +404,10 @@
             
             savedMarkers.forEach((d, index) => {
                 
+                // --- SÜRÜKLENEBİLİR LİSTE ELEMANI ---
                 const listItem = document.createElement('div');
                 listItem.className = 'gta-list-item';
-                listItem.draggable = true; 
+                listItem.draggable = true; // Sürükle-Bırak Aktif
                 
                 let dotColor = d.type === 'red' ? 'var(--danger-color)' : (d.type === 'green' ? 'var(--primary-color)' : (d.type === 'black' ? '#fff' : 'var(--info-color)'));
                 listItem.style.borderLeftColor = dotColor;
@@ -440,41 +426,12 @@
                     </div>
                 `;
                 
-                let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
-                const icon = L.divIcon({ 
-                    className: `pixel-marker`, 
-                    iconSize: [d.size, d.size], 
-                    iconAnchor: [d.size/2, d.size/2],
-                    html: `
-                        <div class="icon-box ${mClass}" style="${d.img ? 'background-image:url('+d.img+')' : ''}">
-                            ${d.text ? `<div class="marker-label">${d.text}</div>` : ''}
-                        </div>`
-                });
-                const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
-                
-                // --- GTA 5 LİSTEDEN TIKLAMA VE PING (RADAR) EFEKTİ ---
+                // Tıklayınca Git
                 listItem.querySelector('.item-content-wrapper').onclick = () => { 
-                    // 1. Önceki listelerde veya haritadaki parlamaları sıfırla
-                    document.querySelectorAll('.gta-list-item').forEach(el => el.classList.remove('active-item'));
-                    document.querySelectorAll('.icon-box').forEach(el => el.classList.remove('gta-ping-active'));
-                    
-                    // 2. Tıklanan liste elemanını parlat
-                    listItem.classList.add('active-item');
-
-                    // 3. Haritayı o noktaya (yakın bir zoom derecesiyle) kaydır
-                    map.flyTo([d.lat, d.lng], 1.5, { animate: true, duration: 1.0 }); 
-
-                    // 4. Haritadaki işaretçiye yanıp sönme animasyonu ekle
-                    if(m._icon) {
-                        let iconBox = m._icon.querySelector('.icon-box');
-                        if(iconBox) {
-                            iconBox.classList.add('gta-ping-active');
-                            // Sinyal efektini 3 saniye sonra otomatik kapat
-                            setTimeout(() => { iconBox.classList.remove('gta-ping-active'); }, 3000);
-                        }
-                    }
+                    map.flyTo([d.lat, d.lng], 1, { animate: true, duration: 1.5 }); 
                 };
 
+                // --- SÜRÜKLE BIRAK OLAYLARI (DRAG & DROP) ---
                 listItem.addEventListener('dragstart', (e) => {
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', index);
@@ -495,20 +452,36 @@
                     const draggedIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
                     if (draggedIdx === index || isNaN(draggedIdx)) return;
 
+                    // Dizideki yerlerini değiştir
                     const movedItem = savedMarkers.splice(draggedIdx, 1)[0];
                     savedMarkers.splice(index, 0, movedItem);
 
+                    // Sıralama (order) verilerini güncelle ve veritabanına kaydet
                     const tx = db.transaction("markers", "readwrite");
                     savedMarkers.forEach((m, i) => {
                         m.order = i;
                         tx.objectStore("markers").put(m);
                     });
                     
-                    render(); 
+                    render(); // Arayüzü yenile
                 });
 
                 listContainer.appendChild(listItem);
 
+
+                // --- HARİTA ÜZERİNDEKİ İŞARETÇİ ---
+                let mClass = d.type === 'red' ? 'fill-red' : (d.type === 'green' ? 'fill-green' : (d.type === 'black' ? 'hollow-black' : ''));
+                const icon = L.divIcon({ 
+                    className: `pixel-marker`, 
+                    iconSize: [d.size, d.size], 
+                    iconAnchor: [d.size/2, d.size/2],
+                    html: `
+                        <div class="icon-box ${mClass}" style="${d.img ? 'background-image:url('+d.img+')' : ''}">
+                            ${d.text ? `<div class="marker-label">${d.text}</div>` : ''}
+                        </div>`
+                });
+                const m = L.marker([d.lat, d.lng], { icon: icon, draggable: isEditable }).addTo(markerLayer);
+                
                 if(isEditable) {
                     m.on('dragend', ev => {
                         const found = savedMarkers.find(x => x.id === d.id);
